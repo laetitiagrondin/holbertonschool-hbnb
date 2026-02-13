@@ -42,7 +42,7 @@ Your diagram should clearly show the three layers, the components within each la
 
 ## Example of a generic package diagram using Mermaid.js:
 
-'''
+```
 classDiagram
 class PresentationLayer {
     <<Interface>>
@@ -56,7 +56,7 @@ class PersistenceLayer {
 }
 PresentationLayer --> BusinessLogicLayer : Facade Pattern
 BusinessLogicLayer --> PersistenceLayer : Database Operations
-'''
+```
 
 # **1. Detailed Class Diagram for Business Logic Layer**
 
@@ -89,7 +89,7 @@ In this task, you will create a class diagram that represents the internal struc
 
 ## Example of a generic class diagram using Mermaid.js:
 
-'''
+```
 classDiagram
 class ClassName {
     +AttributeType attributeName
@@ -98,7 +98,7 @@ class ClassName {
 ClassName1 --|> ClassName2 : Inheritance
 ClassName3 *-- ClassName : Composition
 ClassName4 --> ClassName : Association
-'''
+```
 
 # **2. Sequence Diagrams for API Calls**
 
@@ -137,7 +137,7 @@ You will create sequence diagrams for the following API calls:
 
 ## Example of a generic sequence diagram using Mermaid.js:
 
-'''
+```
 sequenceDiagram
 participant User
 participant API
@@ -150,7 +150,7 @@ BusinessLogic->>Database: Save Data
 Database-->>BusinessLogic: Confirm Save
 BusinessLogic-->>API: Return Response
 API-->>User: Return Success/Failure
-'''
+```
 
 # **3. Documentation Compilation**
 
