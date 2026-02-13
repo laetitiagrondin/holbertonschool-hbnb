@@ -12,8 +12,9 @@ class User {
     +is_admin: bool
     +created: datetime
     +updated: datetime
-    +deleted: datetime
-    +register(first_name: str, last_name: str, email: str, password: str) User
+    +register(first_name: str, last_name: str, email: str, password: str): User
+    +update_profile(data: dict): User
+    +delete(): bool
 }
 class Place {
     +id: UUID
@@ -25,19 +26,23 @@ class Place {
     +longitude: float
     +created: datetime
     +updated: datetime
-    +deleted: datetime
-    +listed_by_place() list[Place]
+    +create(id_owner: UUID, title: str, description: str, price: float, latitude: float, longitude: float): Place
+    +update(data: dict): Place
+    +delete(): bool
+    +list(): list[Place]
 }
 class Review {
     +id: UUID
     +user_id: UUID
     +place_id: UUID
-    +created: datetime
-    +updated: datetime
-    +deleted: datetime
-    +listed: list
     +comment: str
     +rating: int
+    +created: datetime
+    +updated: datetime
+    +create(user_id: UUID, place_id: UUID, comment: str, rating: int)
+    +update(data: dict): Review
+    +delete(): bool
+    +listed_by_place(place_id: UUID): list[Review]
 }
 class Amenity {
     +id: UUID
@@ -45,12 +50,14 @@ class Amenity {
     +description: str
     +created: datetime
     +updated: datetime
-    +deleted: datetime
-    +listed: list
+    +create(name: str, description: str)
+    +update(data: dict): Amenity
+    +delete(): bool
+    +list(): list[Amenity]
 }
 
 User -- Place
 User -- Review
-Place -- Review
+Place *-- Review
 Place o-- Amenity
 ```
