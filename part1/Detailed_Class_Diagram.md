@@ -12,7 +12,7 @@ class User {
     +is_admin: bool
     +created: datetime
     +updated: datetime
-    +register(first_name: str, last_name: str, email: str, password: str): User
+    +register(first_name: str, last_name: str, email: str, password: str) User
     +update_profile(data: dict): User
     +delete(): bool
 }
@@ -26,7 +26,7 @@ class Place {
     +longitude: float
     +created: datetime
     +updated: datetime
-    +create(id_owner: UUID, title: str, description: str, price: float, latitude: float, longitude: float): Place
+    +create(id_owner: UUID, title: str, description: str, price: float, latitude: float, longitude: float) Place
     +update(data: dict): Place
     +delete(): bool
     +list(): list[Place]
@@ -39,7 +39,7 @@ class Review {
     +rating: int
     +created: datetime
     +updated: datetime
-    +create(user_id: UUID, place_id: UUID, comment: str, rating: int)
+    +create(user_id: UUID, place_id: UUID, comment: str, rating: int) Review
     +update(data: dict): Review
     +delete(): bool
     +listed_by_place(place_id: UUID): list[Review]
@@ -50,7 +50,7 @@ class Amenity {
     +description: str
     +created: datetime
     +updated: datetime
-    +create(name: str, description: str)
+    +create(name: str, description: str) Amenity
     +update(data: dict): Amenity
     +delete(): bool
     +list(): list[Amenity]
