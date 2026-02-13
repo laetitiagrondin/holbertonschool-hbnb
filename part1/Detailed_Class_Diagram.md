@@ -1,4 +1,4 @@
-```
+```mermaid
 ---
 title: Business Logic Layer - Class Diagram
 ---
