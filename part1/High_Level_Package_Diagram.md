@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
 class PresentationLayer {
     <<layer>>
@@ -20,3 +21,4 @@ class PersistenceLayer {
 }
 PresentationLayer ..> BusinessLogicLayer
 BusinessLogicLayer ..> PersistenceLayer
+```
