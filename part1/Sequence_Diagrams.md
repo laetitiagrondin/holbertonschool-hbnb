@@ -3,23 +3,21 @@
 ```mermaid
 sequenceDiagram
     participant Client
-    participant UserAPI
-    participant HBnBFacade
-    participant User
-    participant UserRepository
-    participant Database
+    participant APIController
+    participant UserService
+    participant UserModel
+    participant Persistence
 
-    Client->>UserAPI: POST /users (registration data)
-    UserAPI->>UserAPI: Validate input
-    UserAPI->>HBnBFacade: create_user(data)
-    HBnBFacade->>User: Instantiate User
-    HBnBFacade->>User: Hash password
-    HBnBFacade->>UserRepository: save(User)
-    UserRepository->>Database: INSERT user
-    Database-->>UserRepository: Success
-    UserRepository-->>HBnBFacade: User saved
-    HBnBFacade-->>UserAPI: Return user object
-    UserAPI-->>Client: 201 Created
+    Client->>APIController: POST /users {first_name, last_name, email, password}
+    APIController->>APIController: Validate input
+    APIController->>UserService: register_user(data)
+    UserService->>UserModel: create(data)
+    UserModel->>UserModel: hash_password()
+    UserModel->>Persistence: insert user
+    Persistence-->>UserModel: user_id
+    UserModel-->>UserService: user_obj
+    UserService-->>APIController: 201 Created {id, email}
+    APIController-->>Client: JSON response
 ```
 
 ## 2. Place Creation :
@@ -28,21 +26,19 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant PlaceAPI
-    participant HBnBFacade
-    participant Place
-    participant PlaceRepository
-    participant Database
+    participant PlaceService
+    participant PlaceModel
+    participant Persistence
 
-    Client->>PlaceAPI: POST /places
-    PlaceAPI->>PlaceAPI: Validate token & input
-    PlaceAPI->>HBnBFacade: create_place(user_id, data)
-    HBnBFacade->>Place: Instantiate Place
-    HBnBFacade->>PlaceRepository: save(Place)
-    PlaceRepository->>Database: INSERT place
-    Database-->>PlaceRepository: Success
-    PlaceRepository-->>HBnBFacade: Place saved
-    HBnBFacade-->>PlaceAPI: Return place object
-    PlaceAPI-->>Client: 201 Created
+    Client->>PlaceAPI: POST /places {data}
+    PlaceAPI->>PlaceAPI:Validate token & input
+    PlaceAPI->>PlaceService: create_place(user_id, data)
+    PlaceService->>PlaceModel: create(data)
+    PlaceModel->>Persistence: insert place
+    Persistence-->>PlaceModel: place_id
+    PlaceModel-->>PlaceService: place_obj
+    PlaceService-->>PlaceAPI: 201 Created {id, title}
+    PlaceAPI-->>Client: JSON response
 ```
 
 ## 3. Review Submission :
@@ -51,22 +47,19 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant ReviewAPI
-    participant HBnBFacade
-    participant Review
-    participant ReviewRepository
-    participant Database
+    participant ReviewService
+    participant ReviewModel
+    participant Persistence
 
-    Client->>ReviewAPI: POST /places/{id}/reviews
+    Client->>ReviewAPI: POST /places/{id}/reviews {comment, rating}
     ReviewAPI->>ReviewAPI: Validate input
-    ReviewAPI->>HBnBFacade: create_review(user_id, place_id, data)
-    HBnBFacade->>HBnBFacade: Verify place exists
-    HBnBFacade->>Review: Instantiate Review
-    HBnBFacade->>ReviewRepository: save(Review)
-    ReviewRepository->>Database: INSERT review
-    Database-->>ReviewRepository: Success
-    ReviewRepository-->>HBnBFacade: Review saved
-    HBnBFacade-->>ReviewAPI: Return review object
-    ReviewAPI-->>Client: 201 Created
+    ReviewAPI->>ReviewService: create_review(user_id, place_id, data)
+    ReviewService->>ReviewModel: create(data)
+    ReviewModel->>Persistence: insert review
+    Persistence-->>ReviewModel: review_id
+    ReviewModel-->>ReviewService: review_obj
+    ReviewService-->>ReviewAPI: 201 Created {id, comment}
+    ReviewAPI-->>Client: JSON response
 ```
 
 ## 4. Fetching a List of Places :
