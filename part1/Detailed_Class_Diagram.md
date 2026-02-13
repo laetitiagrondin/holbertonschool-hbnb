@@ -1,3 +1,4 @@
+```
 ---
 title: Business Logic Layer - Class Diagram
 ---
@@ -52,3 +53,4 @@ User -- Place
 User -- Review
 Place -- Review
 Place o-- Amenity
+```
