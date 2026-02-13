@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant Client
     participant UserAPI
@@ -17,7 +18,9 @@ sequenceDiagram
     UserRepository-->>HBnBFacade: User saved
     HBnBFacade-->>UserAPI: Return user object
     UserAPI-->>Client: 201 Created
+```
 
+```mermaid
 sequenceDiagram
     participant Client
     participant PlaceAPI
@@ -36,7 +39,9 @@ sequenceDiagram
     PlaceRepository-->>HBnBFacade: Place saved
     HBnBFacade-->>PlaceAPI: Return place object
     PlaceAPI-->>Client: 201 Created
+```
 
+```mermaid
 sequenceDiagram
     participant Client
     participant ReviewAPI
@@ -56,7 +61,9 @@ sequenceDiagram
     ReviewRepository-->>HBnBFacade: Review saved
     HBnBFacade-->>ReviewAPI: Return review object
     ReviewAPI-->>Client: 201 Created
+```
 
+```mermaid
 sequenceDiagram
     participant Client
     participant PlaceAPI
@@ -72,3 +79,4 @@ sequenceDiagram
     PlaceRepository-->>HBnBFacade: List<Place>
     HBnBFacade-->>PlaceAPI: Return places list
     PlaceAPI-->>Client: 200 OK (JSON list)
+```
