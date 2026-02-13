@@ -1,3 +1,5 @@
+## 1. User Registration :
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -20,6 +22,8 @@ sequenceDiagram
     UserAPI-->>Client: 201 Created
 ```
 
+## 2. Place Creation :
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -40,6 +44,8 @@ sequenceDiagram
     HBnBFacade-->>PlaceAPI: Return place object
     PlaceAPI-->>Client: 201 Created
 ```
+
+## 3. Review Submission :
 
 ```mermaid
 sequenceDiagram
@@ -62,6 +68,8 @@ sequenceDiagram
     HBnBFacade-->>ReviewAPI: Return review object
     ReviewAPI-->>Client: 201 Created
 ```
+
+## 4. Fetching a List of Places :
 
 ```mermaid
 sequenceDiagram
