@@ -193,5 +193,5 @@ The final document should be clear, professional, and structured in a way that m
     - Make sure that all diagrams are accurately represented and that their accompanying explanations are clear and informative.
 
 6. Finalize the Document
-- Save the document in a standard format (e.g., PDF or Word document) for easy sharing and reference.
-- Double-check that all components of the technical documentation are included and correctly formatted.
+    - Save the document in a standard format (e.g., PDF or Word document) for easy sharing and reference.
+    - Double-check that all components of the technical documentation are included and correctly formatted.
