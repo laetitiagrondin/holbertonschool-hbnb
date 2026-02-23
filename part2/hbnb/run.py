@@ -1,3 +1,4 @@
+""" Point d'entrée principal pour lancer l'application. """
 from app import create_app
 
 app = create_app()

@@ -1,6 +1,13 @@
+"""
+Module définissant l'interface du dépôt et son implémentation en mémoire.
+"""
+
+
 from abc import ABC, abstractmethod
 
 class Repository(ABC):
+    """ Interface abstraite pour les dépôts de données. """
+    
     @abstractmethod
     def add(self, obj):
         pass
@@ -27,6 +34,8 @@ class Repository(ABC):
 
 
 class InMemoryRepository(Repository):
+    """ Implémentation en mémoire de l'interface Repository. """
+    
     def __init__(self):
         self._storage = {}
 
