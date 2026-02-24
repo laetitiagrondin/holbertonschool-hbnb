@@ -52,13 +52,13 @@ class BaseModel:
         """
         # Génère un UUID v4 et le convertit en chaîne de caractères
         self.id = str(uuid.uuid4())
-
+        now = datetime.now()
         # Enregistre l'instant de création — ne sera jamais modifié
-        self.created_at = datetime.now()
+        self.created_at = now
 
         # Initialisé à la même valeur que created_at ; sera mis à jour
         # à chaque appel à save()
-        self.updated_at = datetime.now()
+        self.updated_at = now
 
     # ------------------------------------------------------------------
     # Méthodes de mutation

@@ -46,7 +46,7 @@ class User(BaseModel):
     # Expression régulière pour valider le format d'une adresse e-mail.
     # Accepte les caractères alphanumériques, points, tirets et signes +
     # avant le @, puis un domaine avec une extension d'au moins 2 lettres.
-    _EMAIL_RE = re.compile(r"^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$")
+    __EMAIL_RE = re.compile(r"^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$")
 
     def __init__(
         self,
@@ -87,7 +87,7 @@ class User(BaseModel):
     @property
     def first_name(self):
         """ Getter pour le prénom. """
-        return self._first_name
+        return self.__first_name
 
     @first_name.setter
     def first_name(self, value):
@@ -96,12 +96,12 @@ class User(BaseModel):
             raise ValueError(
                 "Le prénom est obligatoire (max 50 caractères)."
             )
-        self._first_name = value
+        self.__first_name = value
 
     @property
     def last_name(self):
         """ Getter pour le nom. """
-        return self._last_name
+        return self.__last_name
 
     @last_name.setter
     def last_name(self, value):
@@ -110,33 +110,33 @@ class User(BaseModel):
             raise ValueError(
                 "Le nom est obligatoire (max 50 caractères)."
             )
-        self._last_name = value
+        self.__last_name = value
 
     @property
     def email(self):
         """ Getter pour l'e-mail. """
-        return self._email
+        return self.__email
 
     @email.setter
     def email(self, value):
         """ Setter pour l'e-mail avec validation Regex. """
-        if not value or not self._EMAIL_RE.match(value):
+        if not value or not self.__EMAIL_RE.match(value):
             raise ValueError(
                 f"L'adresse e-mail '{value}' est invalide."
             )
-        self._email = value
+        self.__email = value
 
     @property
     def is_admin(self):
         """ Getter pour le statut administrateur. """
-        return self._is_admin
+        return self.__is_admin
 
     @is_admin.setter
     def is_admin(self, value):
         """ Setter pour le statut administrateur. """
         if not isinstance(value, bool):
             raise ValueError("Le statut is_admin doit être un booléen.")
-        self._is_admin = value
+        self.__is_admin = value
 
     # ------------------------------------------------------------------
     # Mise à jour
@@ -167,9 +167,6 @@ class User(BaseModel):
         for cle, valeur in data.items():
             if cle in champs_autorises:
                 setattr(self, cle, valeur)
-
-        # Revalide l'objet après modification pour détecter toute incohérence
-        self._validate()
 
         # Met à jour l'horodatage de modification
         self.save()

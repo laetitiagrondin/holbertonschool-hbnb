@@ -110,7 +110,7 @@ class Place(BaseModel):
     @property
     def title(self):
         """ Getter pour le titre. """
-        return self._title
+        return self.__title
 
     @title.setter
     def title(self, value):
@@ -119,12 +119,12 @@ class Place(BaseModel):
             raise ValueError(
                 "Le titre est obligatoire et doit faire maximum 100 caractères."
             )
-        self._title = value
+        self.__title = value
 
     @property
     def price(self):
         """ Getter pour le prix. """
-        return self._price
+        return self.__price
 
     @price.setter
     def price(self, value):
@@ -133,12 +133,12 @@ class Place(BaseModel):
             raise ValueError(
                 f"Le prix doit être une valeur positive (reçu : {value})."
             )
-        self._price = float(value)
+        self.__price = float(value)
 
     @property
     def latitude(self):
         """ Getter pour la latitude. """
-        return self._latitude
+        return self.__latitude
 
     @latitude.setter
     def latitude(self, value):
@@ -147,12 +147,12 @@ class Place(BaseModel):
             raise ValueError(
                 f"La latitude doit être entre -90.0 et 90.0 (reçu : {value})."
             )
-        self._latitude = float(value)
+        self.__latitude = float(value)
 
     @property
     def longitude(self):
         """ Getter pour la longitude. """
-        return self._longitude
+        return self.__longitude
 
     @longitude.setter
     def longitude(self, value):
@@ -161,12 +161,12 @@ class Place(BaseModel):
             raise ValueError(
                 f"La longitude doit être entre -180.0 et 180.0 (reçu : {value})."
             )
-        self._longitude = float(value)
+        self.__longitude = float(value)
 
     @property
     def owner(self):
         """ Getter pour le propriétaire. """
-        return self._owner
+        return self.__owner
 
     @owner.setter
     def owner(self, value):
@@ -175,7 +175,7 @@ class Place(BaseModel):
             raise ValueError(
                 "Le champ 'owner' doit être une instance valide de User."
             )
-        self._owner = value
+        self.__owner = value
 
     def add_review(self, review):
         """ Ajoute une critique à la liste. """
@@ -290,9 +290,6 @@ class Place(BaseModel):
         self.price     = float(self.price)
         self.latitude  = float(self.latitude)
         self.longitude = float(self.longitude)
-
-        # Revalide l'objet après modification
-        self._validate()
 
         # Rafraîchit l'horodatage de dernière modification
         self.save()

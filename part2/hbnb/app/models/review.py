@@ -85,7 +85,7 @@ class Review(BaseModel):
     @property
     def text(self):
         """ Getter pour le contenu de l'avis. """
-        return self._text
+        return self.__text
 
     @text.setter
     def text(self, value):
@@ -94,12 +94,12 @@ class Review(BaseModel):
             raise ValueError(
                 "Le contenu de l'avis ('text') est obligatoire."
             )
-        self._text = value
+        self.__text = value
 
     @property
     def rating(self):
         """ Getter pour la note. """
-        return self._rating
+        return self.__rating
 
     @rating.setter
     def rating(self, value):
@@ -108,12 +108,12 @@ class Review(BaseModel):
             raise ValueError(
                 f"La note doit être un entier entre 1 et 5 (reçu : {value})."
             )
-        self._rating = value
+        self.__rating = value
 
     @property
     def place(self):
         """ Getter pour le lieu associé. """
-        return self._place
+        return self.__place
 
     @place.setter
     def place(self, value):
@@ -122,12 +122,12 @@ class Review(BaseModel):
             raise ValueError(
                 "Le champ 'place' doit être une instance valide de Place."
             )
-        self._place = value
+        self.__place = value
 
     @property
     def user(self):
         """ Getter pour l'auteur de l'avis. """
-        return self._user
+        return self.__user
 
     @user.setter
     def user(self, value):
@@ -136,7 +136,7 @@ class Review(BaseModel):
             raise ValueError(
                 "Le champ 'user' doit être une instance valide de User."
             )
-        self._user = value 
+        self.__user = value 
 
     # ------------------------------------------------------------------
     # Mise à jour
@@ -166,9 +166,6 @@ class Review(BaseModel):
         if "rating" in data:
             # S'assure que la note est bien un entier
             self.rating = int(data["rating"])
-
-        # Revalide après modification
-        self._validate()
 
         # Rafraîchit l'horodatage de dernière modification
         self.save()

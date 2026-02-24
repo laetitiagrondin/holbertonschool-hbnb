@@ -57,7 +57,7 @@ class Amenity(BaseModel):
     @property
     def name(self):
         """ Getter pour l'attribut privé _name. """
-        return self._name
+        return self.__name
 
     @name.setter
     def name(self, value):
@@ -73,7 +73,7 @@ class Amenity(BaseModel):
             raise ValueError(
                 "Le nom de l'équipement ne doit pas dépasser 50 caractères."
             )
-        self._name = value
+        self.__name = value
 
     # ------------------------------------------------------------------
     # Mise à jour
@@ -101,31 +101,16 @@ class Amenity(BaseModel):
         if "name" in data:
             self.name = data["name"]
 
-        # Revalide après modification
-        self._validate()
-
         # Rafraîchit l'horodatage de dernière modification
         self.save()
-
-    # ------------------------------------------------------------------
+    
     # Sérialisation
-    # ------------------------------------------------------------------
-
+    
     def to_dict(self) -> dict:
         """
-        Sérialise l'équipement sous forme de dictionnaire JSON-compatible.
-
-        Étend le dictionnaire de base (``BaseModel.to_dict()``) avec le
-        champ ``name``.
-
-        Retour
-        ------
-        dict
-            Dictionnaire contenant id, name, created_at et updated_at.
+        Sérialise l'équipement.
         """
-        # Récupère le dictionnaire de base (id, created_at, updated_at)
+        #renvoie id, created_at, updated_at
         base = super().to_dict()
-
-        # Ajoute le nom de l'équipement
         base["name"] = self.name
         return base
