@@ -52,34 +52,28 @@ class Amenity(BaseModel):
         """
         # Initialise id, created_at et updated_at via le constructeur parent
         super().__init__()
-
         self.name = name
 
-        # Validation immédiate après affectation
-        self._validate()
+    @property
+    def name(self):
+        """ Getter pour l'attribut privé _name. """
+        return self._name
 
-    # ------------------------------------------------------------------
-    # Validation interne
-    # ------------------------------------------------------------------
-
-    def _validate(self):
+    @name.setter
+    def name(self, value):
         """
-        Vérifie que le nom de l'équipement respecte les contraintes métier.
-
-        Contrôles effectués :
-            - ``name`` : non vide et longueur ≤ 50 caractères.
-
-        Lève
-        ----
-        ValueError
-            Si le nom est vide ou trop long.
+        Setter pour le nom avec logique de validation intégrée.
+        Lève une ValueError si les contraintes ne sont pas respectées.
         """
-        # Le nom doit être une chaîne non vide d'au plus 50 caractères
-        if not self.name or len(self.name) > 50:
+        if not value or not isinstance(value, str):
             raise ValueError(
-                "Le champ 'name' de l'équipement est obligatoire "
-                "et doit contenir au maximum 50 caractères."
+                "Le nom de l'équipement est obligatoire et doit être une chaîne."
             )
+        if len(value) > 50:
+            raise ValueError(
+                "Le nom de l'équipement ne doit pas dépasser 50 caractères."
+            )
+        self._name = value
 
     # ------------------------------------------------------------------
     # Mise à jour
