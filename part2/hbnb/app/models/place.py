@@ -107,7 +107,7 @@ class Place(BaseModel):
         # Liste des équipements (Amenity) disponibles — initialement vide
         self.amenities: list = []
 
-     @property
+    @property
     def title(self):
         """ Getter pour le titre. """
         return self._title
