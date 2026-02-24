@@ -107,60 +107,83 @@ class Place(BaseModel):
         # Liste des équipements (Amenity) disponibles — initialement vide
         self.amenities: list = []
 
-        # Validation immédiate : lève ValueError ou TypeError si une règle est violée
-        self._validate()
+     @property
+    def title(self):
+        """ Getter pour le titre. """
+        return self._title
 
-    # ------------------------------------------------------------------
-    # Validation interne
-    # ------------------------------------------------------------------
-
-    def _validate(self):
-        """
-        Vérifie que les attributs du lieu respectent les contraintes métier.
-
-        Contrôles effectués :
-            - ``title``     : non vide et longueur ≤ 100 caractères.
-            - ``price``     : strictement positive (> 0).
-            - ``latitude``  : comprise entre -90.0 et 90.0 inclus.
-            - ``longitude`` : comprise entre -180.0 et 180.0 inclus.
-            - ``owner``     : instance de la classe ``User``.
-
-        Lève
-        ----
-        ValueError
-            Si une contrainte numérique ou de longueur est violée.
-        ValueError
-            Si le propriétaire n'est pas une instance ``User`` valide.
-        """
-        # Vérification du titre : obligatoire et limité à 100 caractères
-        if not self.title or len(self.title) > 100:
+    @title.setter
+    def title(self, value):
+        """ Setter pour le titre (max 100 caractères). """
+        if not value or len(value) > 100:
             raise ValueError(
-                "Le champ 'title' est obligatoire et doit contenir au maximum 100 caractères."
+                "Le titre est obligatoire et doit faire maximum 100 caractères."
             )
+        self._title = value
 
-        # Le prix doit être un nombre strictement positif
-        if self.price <= 0:
-            raise ValueError(
-                f"Le prix doit être une valeur positive (reçu : {self.price})."
-            )
+    @property
+    def price(self):
+        """ Getter pour le prix. """
+        return self._price
 
-        # La latitude doit être comprise entre -90° et +90° (pôles Sud et Nord)
-        if not (-90.0 <= self.latitude <= 90.0):
+    @price.setter
+    def price(self, value):
+        """ Setter pour le prix (doit être positif). """
+        if not isinstance(value, (int, float)) or value <= 0:
             raise ValueError(
-                f"La latitude doit être comprise entre -90.0 et 90.0 (reçu : {self.latitude})."
+                f"Le prix doit être une valeur positive (reçu : {value})."
             )
+        self._price = float(value)
 
-        # La longitude doit être comprise entre -180° et +180° (antiméridien)
-        if not (-180.0 <= self.longitude <= 180.0):
-            raise ValueError(
-                f"La longitude doit être comprise entre -180.0 et 180.0 (reçu : {self.longitude})."
-            )
+    @property
+    def latitude(self):
+        """ Getter pour la latitude. """
+        return self._latitude
 
-        # Le propriétaire doit être une instance User valide
-        if not isinstance(self.owner, User):
+    @latitude.setter
+    def latitude(self, value):
+        """ Setter pour la latitude (-90.0 à 90.0). """
+        if not (-90.0 <= value <= 90.0):
             raise ValueError(
-                "Le champ 'owner' doit être une instance valide de la classe User."
+                f"La latitude doit être entre -90.0 et 90.0 (reçu : {value})."
             )
+        self._latitude = float(value)
+
+    @property
+    def longitude(self):
+        """ Getter pour la longitude. """
+        return self._longitude
+
+    @longitude.setter
+    def longitude(self, value):
+        """ Setter pour la longitude (-180.0 à 180.0). """
+        if not (-180.0 <= value <= 180.0):
+            raise ValueError(
+                f"La longitude doit être entre -180.0 et 180.0 (reçu : {value})."
+            )
+        self._longitude = float(value)
+
+    @property
+    def owner(self):
+        """ Getter pour le propriétaire. """
+        return self._owner
+
+    @owner.setter
+    def owner(self, value):
+        """ Setter pour le propriétaire (doit être une instance de User). """
+        if not isinstance(value, User):
+            raise ValueError(
+                "Le champ 'owner' doit être une instance valide de User."
+            )
+        self._owner = value
+
+    def add_review(self, review):
+        """ Ajoute une critique à la liste. """
+        self.reviews.append(review)
+
+    def add_amenity(self, amenity):
+        """ Ajoute un équipement à la liste. """
+        self.amenities.append(amenity)  
 
     # ------------------------------------------------------------------
     # Gestion des relations
