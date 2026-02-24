@@ -78,50 +78,65 @@ class User(BaseModel):
         super().__init__()
 
         self.first_name = first_name
-        self.last_name  = last_name
-        self.email      = email
+        self.last_name = last_name
+        self.email = email
         # bool() garantit que la valeur est bien un booléen même si on passe 1 ou 0
-        self.is_admin   = bool(is_admin)
+        self.is_admin = bool(is_admin)
 
         # Validation immédiate : lève ValueError si une règle est violée
-        self._validate()
+    @property
+    def first_name(self):
+        """ Getter pour le prénom. """
+        return self._first_name
 
-    # ------------------------------------------------------------------
-    # Validation interne
-    # ------------------------------------------------------------------
-
-    def _validate(self):
-        """
-        Vérifie que les attributs de l'utilisateur respectent les contraintes métier.
-
-        Contrôles effectués :
-            - ``first_name`` : non vide et longueur ≤ 50 caractères.
-            - ``last_name``  : non vide et longueur ≤ 50 caractères.
-            - ``email``      : correspond à l'expression régulière ``_EMAIL_RE``.
-
-        Lève
-        ----
-        ValueError
-            Message explicite indiquant quel champ est invalide et pourquoi.
-        """
-        # Vérification du prénom : doit être présent et ne pas dépasser 50 caractères
-        if not self.first_name or len(self.first_name) > 50:
+    @first_name.setter
+    def first_name(self, value):
+        """ Setter pour le prénom (max 50 caractères). """
+        if not value or len(value) > 50:
             raise ValueError(
-                "Le champ 'first_name' est obligatoire et doit contenir au maximum 50 caractères."
+                "Le prénom est obligatoire (max 50 caractères)."
             )
+        self._first_name = value
 
-        # Vérification du nom de famille : même règle que le prénom
-        if not self.last_name or len(self.last_name) > 50:
-            raise ValueError(
-                "Le champ 'last_name' est obligatoire et doit contenir au maximum 50 caractères."
-            )
+    @property
+    def last_name(self):
+        """ Getter pour le nom. """
+        return self._last_name
 
-        # Vérification du format de l'e-mail via l'expression régulière
-        if not self._EMAIL_RE.match(self.email):
+    @last_name.setter
+    def last_name(self, value):
+        """ Setter pour le nom (max 50 caractères). """
+        if not value or len(value) > 50:
             raise ValueError(
-                f"L'adresse e-mail '{self.email}' est invalide. "
-                "Format attendu : utilisateur@domaine.ext"
+                "Le nom est obligatoire (max 50 caractères)."
             )
+        self._last_name = value
+
+    @property
+    def email(self):
+        """ Getter pour l'e-mail. """
+        return self._email
+
+    @email.setter
+    def email(self, value):
+        """ Setter pour l'e-mail avec validation Regex. """
+        if not value or not self._EMAIL_RE.match(value):
+            raise ValueError(
+                f"L'adresse e-mail '{value}' est invalide."
+            )
+        self._email = value
+
+    @property
+    def is_admin(self):
+        """ Getter pour le statut administrateur. """
+        return self._is_admin
+
+    @is_admin.setter
+    def is_admin(self, value):
+        """ Setter pour le statut administrateur. """
+        if not isinstance(value, bool):
+            raise ValueError("Le statut is_admin doit être un booléen.")
+        self._is_admin = value
 
     # ------------------------------------------------------------------
     # Mise à jour
