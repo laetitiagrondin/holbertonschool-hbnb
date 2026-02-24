@@ -1,4 +1,10 @@
+"""
+Module implémentant le pattern Facade pour coordonner les couches.
+"""
+from app.persistence.repository import InMemoryRepository
+
 class HBnBFacade:
+    """ Facade pour gérer la communication entre les couches. """
     def __init__(self):
         self.user_repo = InMemoryRepository()
 

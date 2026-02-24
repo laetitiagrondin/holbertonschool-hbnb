@@ -1,3 +1,4 @@
+""" Configuration de l'application. """
 import os
 
 class Config:
