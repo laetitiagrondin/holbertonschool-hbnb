@@ -82,49 +82,61 @@ class Review(BaseModel):
         self.place = place  # Lieu évalué par cet avis
         self.user  = user   # Auteur de l'avis
 
-        # Validation immédiate après affectation
-        self._validate()
+    @property
+    def text(self):
+        """ Getter pour le contenu de l'avis. """
+        return self._text
 
-    # ------------------------------------------------------------------
-    # Validation interne
-    # ------------------------------------------------------------------
-
-    def _validate(self):
-        """
-        Vérifie que les attributs de l'avis respectent les contraintes métier.
-
-        Contrôles effectués :
-            - ``text``   : chaîne non vide.
-            - ``rating`` : entier entre 1 et 5 inclus.
-            - ``place``  : instance de la classe ``Place``.
-            - ``user``   : instance de la classe ``User``.
-
-        Lève
-        ----
-        ValueError
-            Si le texte est vide, la note invalide, ou les références incorrectes.
-        """
-        # Le texte de l'avis ne peut pas être vide
-        if not self.text:
-            raise ValueError("Le contenu de l'avis ('text') est obligatoire et ne peut pas être vide.")
-
-        # La note doit être un entier entre 1 et 5 inclus
-        if not (1 <= self.rating <= 5):
+    @text.setter
+    def text(self, value):
+        """ Setter pour le texte (ne peut pas être vide). """
+        if not value or not isinstance(value, str):
             raise ValueError(
-                f"La note ('rating') doit être un entier entre 1 et 5 (reçu : {self.rating})."
+                "Le contenu de l'avis ('text') est obligatoire."
             )
+        self._text = value
 
-        # Le lieu doit être une instance valide de Place
-        if not isinstance(self.place, Place):
-            raise ValueError(
-                "Le champ 'place' doit être une instance valide de la classe Place."
-            )
+    @property
+    def rating(self):
+        """ Getter pour la note. """
+        return self._rating
 
-        # L'auteur doit être une instance valide de User
-        if not isinstance(self.user, User):
+    @rating.setter
+    def rating(self, value):
+        """ Setter pour la note (doit être entre 1 et 5). """
+        if not isinstance(value, int) or not (1 <= value <= 5):
             raise ValueError(
-                "Le champ 'user' doit être une instance valide de la classe User."
+                f"La note doit être un entier entre 1 et 5 (reçu : {value})."
             )
+        self._rating = value
+
+    @property
+    def place(self):
+        """ Getter pour le lieu associé. """
+        return self._place
+
+    @place.setter
+    def place(self, value):
+        """ Setter pour le lieu (doit être une instance de Place). """
+        if not isinstance(value, Place):
+            raise ValueError(
+                "Le champ 'place' doit être une instance valide de Place."
+            )
+        self._place = value
+
+    @property
+    def user(self):
+        """ Getter pour l'auteur de l'avis. """
+        return self._user
+
+    @user.setter
+    def user(self, value):
+        """ Setter pour l'auteur (doit être une instance de User). """
+        if not isinstance(value, User):
+            raise ValueError(
+                "Le champ 'user' doit être une instance valide de User."
+            )
+        self._user = value 
 
     # ------------------------------------------------------------------
     # Mise à jour
