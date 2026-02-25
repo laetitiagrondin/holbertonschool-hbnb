@@ -3,10 +3,14 @@ Module implémentant le pattern Facade pour coordonner les couches.
 """
 from app.persistence.repository import InMemoryRepository
 
+
 class HBnBFacade:
     """ Facade pour gérer la communication entre les couches. """
     def __init__(self):
         self.user_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
+        self.review_repo = InMemoryRepository()
+        self.amenity_repo = InMemoryRepository()
 
     def create_user(self, user_data):
         user = User(**user_data)
@@ -18,3 +22,6 @@ class HBnBFacade:
 
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
+
+    def get_place(self, place_id):
+        pass
