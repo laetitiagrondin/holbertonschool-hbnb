@@ -42,4 +42,35 @@ class HBnBFacade:
         return amenity
 
     def get_place(self, place_id):
-        pass
+        return self.place_repo.get(place_id)
+
+    def create_place(self, place_data):
+        owner_id = place_data.pop('owner_id', None)
+        amenity_ids = place_data.pop('amenities', [])
+        
+        owner = self.get_user(owner_id)
+        if not owner:
+            raise ValueError("Propriétaire non trouvé")
+
+        place = Place(owner=owner, **place_data)
+        
+        # Ajout des amenities
+        for amenity_id in amenity_ids:
+            amenity = self.get_amenity(amenity_id)
+            if amenity:
+                place.add_amenity(amenity)
+        
+        self.place_repo.add(place)
+        return place
+
+    def get_place(self, place_id):
+        return self.place_repo.get(place_id)
+
+    def get_all_places(self):
+        return self.place_repo.get_all()
+
+    def update_place(self, place_id, place_data):
+        place = self.get_place(place_id)
+        if place:
+            place.update(place_data)
+        return place
