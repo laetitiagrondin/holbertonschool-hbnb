@@ -27,7 +27,7 @@ class ReviewList(Resource):
     def get(self):
         """Retrieve a list of all reviews"""
         def get(self):
-        return [r.to_dict() for r in facade.get_all_reviews()], 200
+            return [r.to_dict() for r in facade.get_all_reviews()], 200
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
@@ -35,9 +35,10 @@ class ReviewResource(Resource):
     @api.response(404, 'Review not found')
     def get(self, review_id):
         """Get review details by ID"""
-        def get(self, review_id):
         review = facade.get_review(review_id)
-        return review.to_dict() if review else ({"message": "Not found"}, 404)
+        if not review:
+            return {"message": "Review not found"}, 404
+        return review.to_dict(), 200
 
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
@@ -46,11 +47,15 @@ class ReviewResource(Resource):
     def put(self, review_id):
         """Update a review's information"""
         updated = facade.update_review(review_id, api.payload)
-        return {"message": "Updated"} if updated else ({"message": "Not found"}, 404)
+        if not updated_review:
+            return {"message": "Review not found"}, 404
+        return {"message": "Review updated successfully"}, 200
 
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review"""
-        def delete(self, review_id):
-        return {"message": "Deleted"} if facade.delete_review(review_id) else ({"message": "Not found"}, 404)
+        success = facade.delete_review(review_id)
+        if not success:
+            return {"message": "Review not found"}, 404
+        return {"message": "Review deleted successfully"}, 200

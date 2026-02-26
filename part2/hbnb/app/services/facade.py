@@ -22,6 +22,9 @@ class HBnBFacade:
 
     def get_user(self, user_id):
         return self.user_repo.get(user_id)
+    
+    def get_all_users(self):
+        return self.user_repo.get_all()
 
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
@@ -81,15 +84,23 @@ class HBnBFacade:
     def create_review(self, review_data):
         user = self.get_user(review_data['user_id'])
         place = self.get_place(review_data['place_id'])
-        if not user or not place:
-            raise ValueError("User or Place not found")
+        if not user:
+            raise ValueError("Utilisateur non trouvé")
+        if not place:
+            raise ValueError("Lieu non trouvé")
         
         # Validation de la note (rating)
         if not (1 <= review_data['rating'] <= 5):
             raise ValueError("Rating must be between 1 and 5")
 
         from app.models.review import Review
-        new_review = Review(**review_data)
+        new_review = Review(
+            text=review_data['text'],
+            rating=review_data['rating'],
+            user=user,   # On passe l'objet User
+            place=place  # On passe l'objet Place
+        )
+
         self.review_repo.add(new_review)
         return new_review
 
@@ -100,7 +111,7 @@ class HBnBFacade:
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        return [r for r in self.review_repo.get_all() if r.place_id == place_id]
+        return [r for r in self.review_repo.get_all() if r.place.id == place_id]
 
     def update_review(self, review_id, review_data):
         review = self.get_review(review_id)
