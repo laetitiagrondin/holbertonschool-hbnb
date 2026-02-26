@@ -77,3 +77,39 @@ class HBnBFacade:
         if place:
             place.update(place_data)
         return place
+
+    def create_review(self, review_data):
+        user = self.user_repo.get(review_data.get("user_id"))
+        place = self.place_repo.get(review_data.get("place_id"))
+        if not user or not place:
+            return {"error": "User or Place not found"}, 404
+        review = Review(user=user, place=place, **review_data)
+        self.review_repo.add(review)
+        return review
+
+    def get_review(self, review_id):
+        return self.review_repo.get(review_id)
+
+    def get_all_reviews(self):
+        return self.review_repo.get_all()
+
+    def get_reviews_by_place(self, place_id):
+        place = self.place_repo.get(place_id)
+        if not place:
+            return None
+        return place.reviews
+
+    def update_review(self, review_id, review_data):
+        review = self.review_repo(review_id)
+        if not review:
+            return None
+        review.update(review_data)
+        self.review_repo.update(review_id, review)
+        return review
+
+    def delete_review(self, review_id):
+        review = self.get_review(review_id)
+        if not review:
+            return {"error": "Review not found"}, 404
+        self.review_repo.delete(review_id)
+        return {"message": "Review deleted successfully"}, 200
