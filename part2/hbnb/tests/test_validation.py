@@ -23,7 +23,7 @@ class TestModelValidation(unittest.TestCase):
         
         # Vérification de l'attribut privé
         user = User("Jean", "Dupont", "jean@test.com")
-        self.assertEqual(user._email, "jean@test.com")
+        self.assertEqual(user.email, "jean@test.com")
 
     def test_user_name_length(self):
         """ Vérifie que le prénom ne dépasse pas 50 caractères. """
@@ -37,7 +37,7 @@ class TestModelValidation(unittest.TestCase):
             Amenity("")  # Nom vide
         
         amenity = Amenity("Wi-Fi")
-        self.assertEqual(amenity._name, "Wi-Fi")
+        self.assertEqual(amenity.name, "Wi-Fi")
 
     def test_place_price_validation(self):
         """ Vérifie que le prix du lieu est strictement positif. """
