@@ -74,7 +74,7 @@ class Review(BaseModel):
         # Initialise id, created_at et updated_at via le constructeur parent
         super().__init__()
 
-        self.text   = text
+        self.text = text
         # Conversion en int pour accepter les chaînes numériques éventuelles
         self.rating = int(rating)
 
