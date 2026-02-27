@@ -100,8 +100,6 @@ class TestHBNBModels(unittest.TestCase):
         self.assertEqual(data['owner']['first_name'], "Marc")
         self.assertIsInstance(data['owner'], dict)
 
-if __name__ == '__main__':
-    unittest.main()
 # ------------------------------------------------------------------
     # COMPLÉMENTS DE COUVERTURE
     # ------------------------------------------------------------------
@@ -134,3 +132,6 @@ if __name__ == '__main__':
         u = User("A", "B", "a@b.com")
         with self.assertRaises(ValueError):
             u.is_admin = "True" # C'est un string, pas un bool, doit lever ValueError
+
+if __name__ == '__main__':
+    unittest.main()

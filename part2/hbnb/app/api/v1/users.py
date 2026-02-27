@@ -65,6 +65,7 @@ class UserResource(Resource):
     @api.response(200, 'User details retrieved successfully')
     @api.response(404, 'User not found')
     def get(self, user_id):
+        print("user_id:", user_id)
         """Get user details by ID"""
         user = facade.get_user(user_id)
         if not user:
@@ -76,17 +77,19 @@ class UserResource(Resource):
                 'email': user.email
                 }, 200
 
+    @api.expect(user_model, validate=True)
     @api.response(200, 'User details retrieved successfully')
     @api.response(400, 'Email already registered')
     @api.response(404, 'User not found')
     def put(self, user_id):
-        user = facade.get(user_id)
+        print("user_id:", user_id)
+        user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
         existing_user = facade.get_user_by_email(api.payload['email'])
         if existing_user and existing_user.id != user_id:
             return {'error': 'Email already registered'}, 400
-        updated_user = facade.updated_user(user_id, api.payload)
+        updated_user = facade.update_user(user_id, api.payload)
         return {
                 'id': updated_user.id,
                 'first_name': updated_user.first_name,
