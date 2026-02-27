@@ -35,6 +35,7 @@ place_model = api.model('Place', {
     'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
 })
 
+
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_model)
@@ -54,6 +55,7 @@ class PlaceList(Resource):
         """Retrieve a list of all places"""
         places = facade.get_all_places()
         return [p.to_summary_dict() for p in places], 200
+
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
