@@ -1,4 +1,4 @@
-PROJET HBnB : Documentation Technique Complète
+PROJET HBnB
 
 Architecture et Conception du Système Version : 1.0
 
@@ -6,7 +6,7 @@ Date : Mars 2026
 1. Introduction
 1.1 Objectif du Document
 
-Ce document constitue le plan directeur complet du projet HBnB (Holberton B&B). Il fournit une référence détaillée de l'architecture du système, de la conception des composants et des interactions entre les couches. Ce guide accompagne les développeurs et architectes tout au long de l'implémentation pour garantir la cohérence du système.
+Ce document constitue le plan directeur complet du projet HBnB. Il fournit une référence détaillée de l'architecture du système, de la conception des composants et des interactions entre les couches. Ce guide accompagne les développeurs et architectes tout au long de l'implémentation pour garantir la cohérence du système.
 1.2 Portée du Document
 
 Cette documentation couvre :
