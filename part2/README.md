@@ -1,6 +1,6 @@
 #  HBnB Project - Phase 2 : Logique Métier & API REST
 
-## 📖 1. Introduction
+##  1. Introduction
 Bienvenue dans la Phase 2 du projet HBnB. Cette étape consiste à transformer notre conception architecturale en une application fonctionnelle en utilisant **Python** et **Flask**. L'objectif est de construire les couches de présentation et de logique d'entreprise, tout en définissant les points de terminaison API essentiels.
 
 ##  2. Architecture et Vision
