@@ -1,4 +1,3 @@
-```mermaid
 classDiagram
     class Utilisateur {
         -UUID id
@@ -77,9 +76,3 @@ classDiagram
     Logement "*" -- "*" Equipement : contient
     Logement .. "*" Equipement : association
     LogementEquipement .. Utilisateur : relation
-
-User -- Place
-User -- Review
-Place *-- Review
-Place o-- Amenity
-```
