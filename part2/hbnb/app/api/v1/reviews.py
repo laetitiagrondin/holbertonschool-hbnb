@@ -51,7 +51,10 @@ class ReviewResource(Resource):
             updated_review = facade.update_review(review_id, api.payload)
             if not updated_review:
                 return {"message": "Review not found"}, 404
-            return {"message": "Review updated successfully"}, 200
+            return {
+                "review": updated_review.text,
+                "message": "Review updated successfully"
+                }, 200
         except ValueError as e:
             return {"message": str(e)}, 400
 

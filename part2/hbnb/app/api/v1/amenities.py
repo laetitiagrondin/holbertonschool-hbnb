@@ -15,10 +15,13 @@ class AmenityList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         amenity_data = api.payload
-        new_amenity = facade.create_amenity(amenity_data)
-        if not new_amenity:
+        if not amenity_data or 'name' not in amenity_data or not amenity_data['name']:
             return {'error': 'Invalid input data'}, 400
-        return {'id': new_amenity.id, 'name': new_amenity.name}, 201
+        try:
+            new_amenity = facade.create_amenity(amenity_data)
+            return {'id': new_amenity.id, 'name': new_amenity.name}, 201
+        except ValueError as e:
+            return {'error': str(e)}, 400 # Transforme l'erreur du modèle en 400
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
@@ -43,10 +46,13 @@ class AmenityResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, amenity_id):
         amenity_data = api.payload
-        amenity = facade.get_amenity(amenity_id)
-        if not amenity:
-            return {'error': 'Amenity not found'}, 404
-        updated_amenity = facade.update_amenity(amenity_id, amenity_data)
-        if not updated_amenity:
+        if not amenity_data or 'name' not in amenity_data or not amenity_data['name']:
             return {'error': 'Invalid input data'}, 400
-        return {'id': updated_amenity.id, 'name': updated_amenity.name}, 200
+        try:
+            amenity = facade.get_amenity(amenity_id)
+            if not amenity:
+                return {'error': 'Amenity not found'}, 404
+            updated_amenity = facade.update_amenity(amenity_id, amenity_data)
+            return {'id': updated_amenity.id, 'name': updated_amenity.name}, 200
+        except ValueError as e:
+            return {'error': str(e)}, 400 # Transforme l'erreur du modèle en 400

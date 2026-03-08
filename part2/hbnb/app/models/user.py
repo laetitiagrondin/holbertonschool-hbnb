@@ -53,6 +53,7 @@ class User(BaseModel):
         first_name: str,
         last_name: str,
         email: str,
+        password: str = None,
         is_admin: bool = False,
     ):
         """
@@ -80,6 +81,7 @@ class User(BaseModel):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
+        self.password = password
         # bool() garantit que la valeur est bien un booléen même si on passe 1 ou 0
         self.is_admin = bool(is_admin)
 

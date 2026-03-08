@@ -56,11 +56,11 @@ class Place(BaseModel):
     def __init__(
         self,
         title: str,
-        description: str,
         price: float,
         latitude: float,
         longitude: float,
         owner: User,
+        description: str = "", # ← optionnel avec valeur par défaut
     ):
         """
         Initialise un nouveau lieu et valide immédiatement ses attributs.
