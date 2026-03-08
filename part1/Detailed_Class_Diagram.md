@@ -1,60 +1,82 @@
 ```mermaid
----
-title: Business Logic Layer - Class Diagram
----
 classDiagram
-class User {
-    +id: UUID
-    +first_name: str
-    +last_name: str
-    +email: str
-    +password: str
-    +is_admin: bool
-    +created: datetime
-    +updated: datetime
-    +register(first_name: str, last_name: str, email: str, password: str) User
-    +update_profile(data: dict) User
-    +delete() bool
-}
-class Place {
-    +id: UUID
-    +id_owner: UUID
-    +title: str
-    +description: str
-    +price: float
-    +latitude: float
-    +longitude: float
-    +created: datetime
-    +updated: datetime
-    +create(id_owner: UUID, title: str, description: str, price: float, latitude: float, longitude: float) Place
-    +update(data: dict) Place
-    +delete() bool
-    +list() list[Place]
-}
-class Review {
-    +id: UUID
-    +user_id: UUID
-    +place_id: UUID
-    +comment: str
-    +rating: int
-    +created: datetime
-    +updated: datetime
-    +create(user_id: UUID, place_id: UUID, comment: str, rating: int) Review
-    +update(data: dict) Review
-    +delete() bool
-    +listed_by_place(place_id: UUID) list[Review]
-}
-class Amenity {
-    +id: UUID
-    +name: str
-    +description: str
-    +created: datetime
-    +updated: datetime
-    +create(name: str, description: str) Amenity
-    +update(data: dict) Amenity
-    +delete() bool
-    +list() list[Amenity]
-}
+    class Utilisateur {
+        -UUID id
+        -String email
+        -String mot_de_passe
+        -String prenom
+        -String nom
+        -DateTime date_creation
+        -DateTime date_mise_a_jour
+        -Boolean est_admin
+        +inscrire() Boolean
+        +se_connecter() Boolean
+        +modifier_profil() Boolean
+        +supprimer_compte() Boolean
+        +valider_email() Boolean
+        +hacher_mot_de_passe() String
+    }
+
+    class Logement {
+        -UUID id
+        -String titre
+        -String description
+        -Float prix
+        -Float latitude
+        -Float longitude
+        -UUID id_proprietaire
+        -DateTime date_creation
+        -DateTime date_mise_a_jour
+        -Integer nombre_invites_max
+        -Integer nombre_chambres
+        -Integer nombre_salles_de_bain
+        +creer_logement() Boolean
+        +modifier_logement() Boolean
+        +supprimer_logement() Boolean
+        +valider_coordonnees() Boolean
+        +calculer_note_moyenne() Float
+        +est_disponible(Date, Date) Boolean
+    }
+
+    class Avis {
+        -UUID id
+        -String commentaire
+        -Integer note
+        -UUID id_utilisateur
+        -UUID id_logement
+        -DateTime date_creation
+        -DateTime date_mise_a_jour
+        +creer_avis() Boolean
+        +modifier_avis() Boolean
+        +supprimer_avis() Boolean
+        +valider_note() Boolean
+    }
+
+    class Equipement {
+        -UUID id
+        -String nom
+        -String description
+        -DateTime date_creation
+        -DateTime date_mise_a_jour
+        +creer_equipement() Boolean
+        +modifier_equipement() Boolean
+        +supprimer_equipement() Boolean
+    }
+
+    class LogementEquipement {
+        -UUID id_logement
+        -UUID id_equipement
+        -DateTime date_creation
+        +ajouter_equipement_au_logement() Boolean
+        +retirer_equipement_du_logement() Boolean
+    }
+
+    Utilisateur "1" --> "*" Logement : possède
+    Utilisateur "1" --> "*" Avis : rédige
+    Logement "1" --> "*" Avis : reçoit
+    Logement "*" -- "*" Equipement : contient
+    Logement .. "*" Equipement : association
+    LogementEquipement .. Utilisateur : relation
 
 User -- Place
 User -- Review
