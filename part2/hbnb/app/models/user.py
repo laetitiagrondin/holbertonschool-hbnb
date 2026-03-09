@@ -58,20 +58,6 @@ class User(BaseModel):
     ):
         """
         Initialise un nouvel utilisateur et valide immédiatement ses attributs.
-
-        Paramètres
-        ----------
-        first_name : str
-            Prénom de l'utilisateur (requis, ≤ 50 caractères).
-        last_name : str
-            Nom de l'utilisateur (requis, ≤ 50 caractères).
-        email : str
-            Adresse e-mail valide et unique (vérifiée par regex).
-        is_admin : bool, optionnel
-            Droits administrateur.  ``False`` par défaut.
-
-        Lève
-        ----
         ValueError
             Si l'un des attributs ne respecte pas les contraintes définies.
         """
@@ -140,9 +126,16 @@ class User(BaseModel):
             raise ValueError("Le statut is_admin doit être un booléen.")
         self.__is_admin = value
 
-    # ------------------------------------------------------------------
+    def hash_password(self, password):
+        """Hache le mot de passe avant de le stocker."""
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    
+    def verify_password(self, password):
+        """Vérifie si le mot de passe fourni correspond au mot de passe haché."""
+        return bcrypt.check_password_hash(self.password, password)
+
+
     # Mise à jour
-    # ------------------------------------------------------------------
 
     def update(self, data: dict):
         """
@@ -173,10 +166,10 @@ class User(BaseModel):
         # Met à jour l'horodatage de modification
         self.save()
 
-    # ------------------------------------------------------------------
+    
     # Sérialisation
-    # ------------------------------------------------------------------
-
+    
+    
     def to_dict(self) -> dict:
         """
         Sérialise l'utilisateur sous forme de dictionnaire JSON-compatible.
