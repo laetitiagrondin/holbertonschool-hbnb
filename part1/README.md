@@ -1,197 +1,180 @@
-# **0. High-Level Package Diagram**
+PROJET HBnB
 
-## Objective
+Architecture et Conception du Système Version : 1.0
 
-Create a high-level package diagram that illustrates the three-layer architecture of the HBnB application and the communication between these layers via the facade pattern. This diagram will provide a conceptual overview of how the different components of the application are organized and how they interact with each other.
+Date : Mars 2026
+1. Introduction
+1.1 Objectif du Document
 
-## Description
+Ce document constitue le plan directeur complet du projet HBnB. Il fournit une référence détaillée de l'architecture du système, de la conception des composants et des interactions entre les couches. Ce guide accompagne les développeurs et architectes tout au long de l'implémentation pour garantir la cohérence du système.
+1.2 Portée du Document
 
-In this task, you will develop a package diagram that visually represents the structure of the application, focusing on its three main layers:
+Cette documentation couvre :
 
-1. Presentation Layer (Services, API): This layer handles the interaction between the user and the application. It includes all the services and APIs that are exposed to the users.
+    L'architecture de haut niveau et le modèle en couches.
 
-2. Business Logic Layer (Models): This layer contains the core business logic and the models that represent the entities in the system (e.g., User, Place, Review, Amenity).
+    La couche de logique métier (entités et relations).
 
-3. Persistence Layer: This layer is responsible for data storage and retrieval, interacting directly with the database.
+    Les flux d'interaction API et les séquences de traitement.
 
-Your diagram should clearly show the three layers, the components within each layer, and the communication pathways between them. The facade pattern should be represented as the interface through which the layers interact.
+    Les décisions de conception et leurs justifications.
 
-## Steps to Complete the Task
+1.3 Présentation du Projet
 
-1. Understand the Layered Architecture
-    - Review the concept of layered architecture and how it is used to organize an application.
-    - Understand the responsibilities of each layer in the context of the HBnB application.
+HBnB est une plateforme de réservation de logements permettant aux utilisateurs de publier des propriétés, de rechercher des hébergements et de gérer des réservations. Le système orchestre des entités clés : Utilisateurs, Logements, Équipements et Avis.
+2. Architecture de Haut Niveau
+2.1 Structure en Couches
 
-2. Research the Facade Pattern
-    - Familiarize yourself with the facade design pattern and how it simplifies interactions between layers by providing a unified interface.
+L'application adopte une layered architecture (architecture en couches) pour séparer les préoccupations :
 
-3. Identify Key Components
-    - Identify the key components that belong to each layer:
-        - Presentation Layer: Services, API endpoints.
-        - Business Logic Layer: Core models (User, Place, Review, Amenity).
-        - Persistence Layer: Database access objects or repositories.
+    Couche de Présentation : Gère les interactions via une API RESTful, la validation des entrées et les réponses HTTP.
 
-4. Draft the Package Diagram
-    - Create a draft of your package diagram, showing the three layers and their components.
-    - Indicate the communication pathways between layers via the facade pattern.
-    - Ensure that the diagram is clear, logical, and easy to understand.
+    Couche de Logique Métier : Contient le cœur fonctionnel, les entités (Utilisateur, Logement, etc.) et les règles métier.
 
-5. Review and Refine
-    - Review your diagram to ensure that it accurately represents the application's architecture.
-    - Make any necessary adjustments to improve clarity and completeness.
+    Couche de Persistance : Abstrait le stockage des données via des Repositories et gère les transactions.
 
-## Example of a generic package diagram using Mermaid.js:
+2.2 Le Patron Facade
 
-```
-classDiagram
-class PresentationLayer {
-    <<Interface>>
-    +ServiceAPI
-}
-class BusinessLogicLayer {
-    +ModelClasses
-}
-class PersistenceLayer {
-    +DatabaseAccess
-}
-PresentationLayer --> BusinessLogicLayer : Facade Pattern
-BusinessLogicLayer --> PersistenceLayer : Database Operations
-```
+Le patron Facade (FaçadeHBnB) sert de point d'entrée unique entre la présentation et la logique métier. Elle orchestre les appels aux services, gère les transactions complexes et découple les changements internes de l'interface externe.
+3. Couche de Logique Métier
+3.1 Diagramme de Classes Détaillé
 
-# **1. Detailed Class Diagram for Business Logic Layer**
+Le diagramme suivant structure les entités, leurs attributs et leurs méthodes de validation :
+3.2 Entités Principales
+Entité	Attributs Clés	Méthodes Principales
+Utilisateur	id (UUID), email, mot_de_passe, est_admin	inscrire(), se_connecter(), hacher_mot_de_passe()
+Logement	id (UUID), titre, prix, latitude, longitude	creer_logement(), calculer_note_moyenne(), est_disponible()
+Avis	id, commentaire, note (1-5), id_utilisateur	creer_avis(), valider_note()
+Équipement	id, nom, description	creer_equipement(), modifier_equipement()
+3.3 Relations et Cardinalités
 
-## Objective
+    Utilisateur ↔ Logement (1:N) : Un utilisateur possède zéro ou plusieurs logements.
 
-Design a detailed class diagram for the Business Logic layer of the HBnB application. This diagram will depict the entities within this layer, their attributes, methods, and the relationships between them. The primary goal is to provide a clear and detailed visual representation of the core business logic, focusing on the key entities: User, Place, Review, and Amenity.
+    Logement ↔ Avis (1:N) : Un logement reçoit plusieurs avis, chaque avis est lié à un seul logement.
 
-## Description
+    Logement ↔ Équipement (N:M) : Relation gérée via l'entité de liaison LogementEquipement.
 
-In this task, you will create a class diagram that represents the internal structure of the Business Logic layer. This diagram will include entities, their attributes, methods, and relationships such as associations, inheritance, and dependencies.
+4. Flux d'Interaction API
+4.1 Séquence de Traitement (Exemple : Recherche de Logements)
 
-## Steps to Complete the Task
+Les diagrammes de séquence illustrent le flux de données entre les composants lors d'un appel API :
 
-1. Review the Business Logic Requirements
-    - Understand the business rules and requirements for each entity in the Business Logic layer.
-    - Review how these entities interact with each other and the significance of their relationships.
+Processus type :
 
-2. Identify Key Attributes and Methods
-    - For each entity, identify the key attributes and methods that define its behavior and state.
-    - Ensure that each entity includes a unique identifier (UUID4) and attributes for creation and update dates.
+    Le Client envoie une requête GET à la Couche Présentation.
 
-3. Design the Class Diagram
-    - Begin by outlining the entities as classes, specifying their attributes and methods.
-    - Represent relationships between entities using appropriate UML notation (e.g., associations, generalizations, compositions).
-    - Include multiplicity where relevant.
+    L'API extrait les paramètres et appelle le ServiceLieu (Logique Métier).
 
-4. Refine and Review
-    - Review the diagram to ensure that it accurately represents the business logic and adheres to the project’s requirements.
-    - Refine the diagram as needed to improve clarity and completeness.
+    Le ServiceFiltre valide les critères (prix > 0, limites de pagination).
 
-## Example of a generic class diagram using Mermaid.js:
+    La Couche Persistance exécute la requête SQL et retourne les données brutes.
 
-```
-classDiagram
-class ClassName {
-    +AttributeType attributeName
-    +MethodType methodName()
-}
-ClassName1 --|> ClassName2 : Inheritance
-ClassName3 *-- ClassName : Composition
-ClassName4 --> ClassName : Association
-```
+    Le résultat est formaté et renvoyé au client avec un code 200 OK.
 
-# **2. Sequence Diagrams for API Calls**
+5. Décisions de Conception
 
-## Objective
+    Utilisation d'UUID : Garantit l'unicité globale sans coordination centrale et renforce la sécurité des identifiants.
 
-Develop sequence diagrams for at least four different API calls to illustrate the interaction between the layers (Presentation, Business Logic, Persistence) and the flow of information within the HBnB application. The sequence diagrams will help visualize how different components of the system interact to fulfill specific use cases, showing the step-by-step process of handling API requests.
+    Horodatage Automatique : Champs date_creation et date_mise_a_jour sur chaque entité pour l'audit et la traçabilité.
 
-## Description
+    Validation Centralisée : Logique de validation intégrée aux entités métier pour assurer la cohérence et faciliter les tests unitaires.
 
-In this task, you will create sequence diagrams that represent the flow of interactions across the different layers of the application for specific API calls. These diagrams will show how the Presentation Layer (Services, API), Business Logic Layer (Models), and Persistence Layer (Database) communicate with each other to handle user requests.
+# HBnB Technical Documentation
 
-You will create sequence diagrams for the following API calls:
+## Table of Contents
+1. [Introduction](#introduction)
+2. [High-Level Architecture](#high-level-architecture)
+3. [Business Logic Layer](#business-logic-layer)
+4. [API Interaction Flow](#api-interaction-flow)
+5. [Conclusion](#conclusion)
 
-1. User Registration: A user signs up for a new account.
-2. Place Creation: A user creates a new place listing.
-3. Review Submission: A user submits a review for a place.
-4. Fetching a List of Places: A user requests a list of places based on certain criteria.
 
-## Steps to Complete the Task
-1. Understand the Use Cases
-    - Review the requirements and business logic for each of the selected API calls.
-    - Understand the sequence of operations needed to fulfill each API call, from the moment a request is received by the API to the point where a response is returned to the client.
 
-2. Identify Key Components Involved
-    - Determine which components of the system (within each layer) are involved in handling each API call.
-    - Identify the order of operations, including method calls and data exchanges between components.
+## 1. Introduction
 
-3. Design the Sequence Diagrams
-    - Begin by drafting the sequence of interactions for each API call.
-    - For each diagram, start with the API call from the Presentation Layer, followed by interactions with the Business Logic Layer, and ending with operations in the Persistence Layer.
-    - Clearly show the flow of messages, including method invocations, data retrieval, and processing steps.
+**Objectif du document:**  
+Ce document fournit une référence technique complète pour le projet HBnB, compilant les diagrammes et explications pour guider le développement et clarifier l’architecture.
 
-4. Refine and Review
-    - Review your diagrams to ensure they accurately reflect the flow of information and operations required to fulfill each API call.
-    - Refine the diagrams for clarity and completeness, ensuring all relevant interactions are captured.
+**Aperçu du projet HBnB:**  
+HBnB est une application de location de logements permettant aux utilisateurs de créer des comptes, gérer leurs annonces, réserver des logements et laisser des avis.  
+Ce document décrit l’architecture globale, la logique métier et les flux d’interactions API.
 
-## Example of a generic sequence diagram using Mermaid.js:
 
-```
-sequenceDiagram
-participant User
-participant API
-participant BusinessLogic
-participant Database
 
-User->>API: API Call (e.g., Register User)
-API->>BusinessLogic: Validate and Process Request
-BusinessLogic->>Database: Save Data
-Database-->>BusinessLogic: Confirm Save
-BusinessLogic-->>API: Return Response
-API-->>User: Return Success/Failure
-```
+## 2. High-Level Architecture
 
-# **3. Documentation Compilation**
+**Diagramme de packages:**  
+![High-Level Package Diagram](diagrams/package_diagram.png)
 
-## Objective
-Compile all the diagrams and explanatory notes created in the previous tasks into a comprehensive technical document. This document will serve as a detailed blueprint for the HBnB project, guiding the implementation phases and providing a clear reference for the system’s architecture and design.
+**Notes explicatives:**  
+- **But:** visualiser la structure globale et les modules principaux.  
+- **Composants clés:** `app`, `models`, `services`, `api`.  
+- **Décisions de conception:** architecture en couches et pattern façade pour isoler responsabilités et faciliter la maintenance.  
+- **Lien avec l’architecture globale:** montre comment les modules interagissent et isolent la logique métier de l’interface utilisateur/API.
 
-## Description
-In this task, you will bring together the high-level package diagram, detailed class diagram for the Business Logic layer, and sequence diagrams for API calls into a single, well-organized document. The goal is to create a cohesive and comprehensive technical document that not only includes the diagrams but also provides explanatory notes that clarify design decisions, describe interactions, and outline the overall architecture of the application.
 
-The final document should be clear, professional, and structured in a way that makes it easy to follow and understand. It will be used as a reference throughout the project, so accuracy and completeness are critical.
 
-# Steps to Complete the Task
-1. Organize Your Work
-    - Gather all diagrams created in the previous tasks:
-        - High-Level Package Diagram (Task 1)
-        - Detailed Class Diagram for the Business Logic Layer (Task 2)
-        - Sequence Diagrams for API Calls (Task 3)
-    - Ensure that each diagram is finalized and reviewed for accuracy and clarity.
+## 3. Business Logic Layer
 
-2. Create an Introduction
-    - Write a brief introduction for the document that explains its purpose and scope.
-    - Provide an overview of the HBnB project and the role of this technical document in guiding the implementation process.
+**Diagramme de classes détaillé:**  
+![Class Diagram](diagrams/class_diagram.png)
 
-3. Structure the Document
-    - Introduction: Briefly describe the project, the purpose of the document, and what it contains.
-    - High-Level Architecture: Include the high-level package diagram and explain the layered architecture and facade pattern used.
-    - Business Logic Layer: Present the detailed class diagram, explaining the entities, their relationships, and how they fit into the business logic of the application.
-    - API Interaction Flow: Include the sequence diagrams for the selected API calls, providing explanations of the interactions and data flow between components.
+**Notes explicatives:**  
+- **But:** définir les entités principales et leurs relations.  
+- **Composants clés:**  
+  - `Utilisateur`: gestion du compte et de l’authentification  
+  - `Logement`: gestion des annonces et disponibilité  
+  - `Avis`: création et gestion des commentaires  
+  - `Equipement` et `LogementEquipement`: gestion des équipements  
+- **Relations importantes:**  
+  - Association `Utilisateur → Logement`  
+  - Composition `Logement → Avis`  
+  - Many-to-Many via `LogementEquipement`  
+- **Décisions de conception:** UUID pour identifiants uniques, validation côté modèle, séparation logique métier/API.
 
-4. Add Explanatory Notes
-    - For each diagram, include explanatory notes that describe:
-        - The purpose of the diagram.
-        - Key components or classes involved.
-        - Design decisions and their rationale.
-        - How the diagram fits into the overall architecture and design of the application.
 
-5. Review and Edit
-    - Review the entire document to ensure it is clear, logical, and free of errors.
-    - Edit the document for clarity, conciseness, and professionalism. Ensure consistent formatting and style throughout.
-    - Make sure that all diagrams are accurately represented and that their accompanying explanations are clear and informative.
 
-6. Finalize the Document
-    - Save the document in a standard format (e.g., PDF or Word document) for easy sharing and reference.
-    - Double-check that all components of the technical documentation are included and correctly formatted.
+## 4. API Interaction Flow
+
+### 4.1 Création d’utilisateur (POST /api/v1/users/)
+![Sequence Create User](diagrams/sequence_create_user.png)  
+
+**Flux:**  
+1. L’utilisateur envoie un JSON avec `first_name`, `last_name`, `email` et `password`.  
+2. L’API appelle la couche service pour valider et enregistrer l’utilisateur.  
+3. Retour : `201 Created` avec l’ID et informations de l’utilisateur.  
+4. Si l’email existe déjà, `400 Bad Request` avec message explicite.
+
+
+### 4.2 Mise à jour d’utilisateur (PUT /api/v1/users/<id>)
+![Sequence Update User](diagrams/sequence_update_user.png)  
+
+**Flux:**  
+1. L’utilisateur envoie les champs à modifier (`first_name`, `last_name`, `email`, etc.).  
+2. L’API valide les données.  
+3. Si les données sont invalides (ex: email mal formé) → `400 Bad Request`.  
+4. Si valide → mise à jour dans le modèle → `200 OK`.
+
+
+### 4.3 Suppression d’utilisateur (DELETE /api/v1/users/<id>)
+![Sequence Delete User](diagrams/sequence_delete_user.png)  
+
+**Flux:**  
+1. L’utilisateur ou l’administrateur envoie la requête de suppression.  
+2. L’API supprime l’utilisateur du modèle.  
+3. Retour : `204 No Content`.
+
+
+### 4.4 Vérification email unique
+![Sequence Check Email](diagrams/sequence_check_email.png)  
+
+**Flux:**  
+1. Lors de la création d’un nouvel utilisateur, le service vérifie si l’email est déjà enregistré.  
+2. Si doublon → `400 Bad Request` avec message “Email already registered”.  
+3. Si unique → création réussie.
+
+
+**Notes générales sur les API:**  
+- Endpoints RESTful avec codes HTTP explicites (`201`, `200`, `204`, `400`).  
+- Validation critique côté serveur pour garantir la cohérence des données.  
+- Séparation **API → Service → Modèle** pour testabilité et extensibilité.

@@ -53,8 +53,6 @@ class HBnBFacade:
         amenity.update(amenity_data)
         return amenity
 
-    def get_place(self, place_id):
-        return self.place_repo.get(place_id)
 
     def create_place(self, place_data):
         owner_id = place_data.pop('owner_id', None)
@@ -65,13 +63,17 @@ class HBnBFacade:
             raise ValueError("Propriétaire non trouvé")
 
         place = Place(owner=owner, **place_data)
-        
-        # Ajout des amenities
+
+        # Vérifier que chaque amenity existe
         for amenity_id in amenity_ids:
+        # Si c'est un dict avec 'id' (venant du modèle nested)
+            if isinstance(amenity_id, dict):
+                amenity_id = amenity_id.get('id')
             amenity = self.get_amenity(amenity_id)
-            if amenity:
-                place.add_amenity(amenity)
-        
+            if not amenity:
+                raise ValueError(f"Amenity {amenity_id} non trouvée")
+            place.add_amenity(amenity)
+
         self.place_repo.add(place)
         return place
 
@@ -123,8 +125,8 @@ class HBnBFacade:
         review = self.get_review(review_id)
         if not review:
             return None
-        review.update(review_data)
-        self.review_repo.update(review_id, review)
+        #review.update(review_data)
+        self.review_repo.update(review_id, review_data)
         return review
 
     def delete_review(self, review_id):

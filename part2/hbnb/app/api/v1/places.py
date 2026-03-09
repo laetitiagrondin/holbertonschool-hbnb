@@ -74,10 +74,15 @@ class PlaceResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
         """Update a place's information"""
-        updated_place = facade.update_place(place_id, api.payload)
-        if not updated_place:
+        place = facade.get_place(place_id)
+        if not place:
             return {"message": "Place not found"}, 404
-        return {"message": "Place updated successfully"}, 200
+        
+        try:
+            updated_place = facade.update_place(place_id, api.payload)
+            return {"message": "Place updated successfully"}, 200
+        except ValueError as e:
+            return {"message": str(e)}, 400
     
 @api.route('/<place_id>/reviews')
 class PlaceReviewList(Resource):

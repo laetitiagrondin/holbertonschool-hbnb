@@ -1,52 +1,61 @@
-Part 2: Implementation of Business Logic and API Endpoints
+#  HBnB Project - Phase 2 : Logique Métier & API REST
 
-In this part of the HBnB Project, you will begin the implementation phase of the application based on the design developed in the previous part. The focus of this phase is to build the Presentation and Business Logic layers of the application using Python and Flask. You will implement the core functionality by defining the necessary classes, methods, and endpoints that will serve as the foundation for the application’s operation.
+##  1. Introduction
+Bienvenue dans la Phase 2 du projet HBnB. Cette étape consiste à transformer notre conception architecturale en une application fonctionnelle en utilisant **Python** et **Flask**. L'objectif est de construire les couches de présentation et de logique d'entreprise, tout en définissant les points de terminaison API essentiels.
 
-In this part, you will create the structure of the project, develop the classes that define the business logic, and implement the API endpoints. The goal is to bring the documented architecture to life by setting up the key functionalities, such as creating and managing users, places, reviews, and amenities, while adhering to best practices in API design.
+##  2. Architecture et Vision
+Le projet repose sur une architecture modulaire garantissant une séparation claire des responsabilités :
 
-It’s important to note that, at this stage, you will focus only on implementing the core functionality of the API. JWT authentication and role-based access control will be addressed in the next part. The services layer will be built using Flask and the flask-restx extension to create RESTful APIs.
-Objectives
+* **Couche Logique Métier (Business Logic) :** Définit les entités (`User`, `Place`, `Review`, `Amenity`), gère les relations et applique les règles de validation.
+* **Couche de Présentation :** Expose les services via une API RESTful utilisant `Flask-RESTx`.
+* **Pattern Façade :** Centralise la communication entre l'API et la logique métier pour un code plus propre et maintenable.
 
-By the end of this project, you should be able to:
 
-    Set Up the Project Structure:
 
-    Organize the project into a modular architecture, following best practices for Python and Flask applications.
-    Create the necessary packages for the Presentation and Business Logic layers.
+---
 
-    Implement the Business Logic Layer:
+##  3. Règles de Validation (Business Rules)
+Chaque modèle d'entité intègre une logique de validation rigoureuse avant tout stockage :
 
-    Develop the core classes for the business logic, including User, Place, Review, and Amenity entities.
-    Implement relationships between entities and define how they interact within the application.
-    Implement the facade pattern to simplify communication between the Presentation and Business Logic layers.
+| Entité | Attribut | Règle de Validation |
+| :--- | :--- | :--- |
+| **User** | `first_name`, `last_name`, `email` | Ne doivent pas être vides. |
+| **User** | `email` | Doit respecter un format d'e-mail valide (Regex). |
+| **Place** | `title` | Ne doit pas être vide. |
+| **Place** | `price` | Doit être un nombre strictement positif (> 0). |
+| **Place** | `latitude` | Doit être comprise entre **-90.0** et **90.0**. |
+| **Place** | `longitude` | Doit être comprise entre **-180.0** et **180.0**. |
+| **Review** | `text` | Ne doit pas être vide. |
+| **Review** | `rating` | Doit être un entier compris entre **1** et **5**. |
 
-    Build RESTful API Endpoints:
+---
 
-    Implement the necessary API endpoints to handle CRUD operations for Users, Places, Reviews, and Amenities.
-    Use flask-restx to define and document the API, ensuring a clear and consistent structure.
-    Implement data serialization to return extended attributes for related objects. For example, when retrieving a Place, the API should include details such as the owner’s first_name, last_name, and relevant amenities.
+##  4. Registre des Tests API (Endpoints & cURL)
 
-    Test and Validate the API:
+Ce tableau documente le succès des tests de boîte noire effectués. 
+*Note : Les UUID utilisés sont des exemples basés sur un flux réel.*
 
-    Ensure that each endpoint works correctly and handles edge cases appropriately.
-    Use tools like Postman or cURL to test your API endpoints.
+| Ordre | Module | Objectif | Commande cURL | Réponse Attendue (HTTP & JSON) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **User** | **Création (Succès)** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}'` | **201 Created** <br> `{"id": "550e8400...", "email": "john.doe@example.com"}` |
+| **2** | **User** | **Données Invalides** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{"first_name": "", "email": "invalid-email"}'` | **400 Bad Request** <br> `{"error": "Invalid input data"}` |
+| **3** | **Place** | **Latitude hors portée**| `curl -i -X POST "http://127.0.0.1:5000/api/v1/places/" -H "Content-Type: application/json" -d '{"title": "Villa", "latitude": 150.0}'` | **400 Bad Request** <br> `{"error": "Latitude must be between -90 and 90"}` |
+| **4** | **Place** | **Liaison Amenity** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/places/PLACE_UUID/amenities" -H "Content-Type: application/json" -d '{"amenity_id": "AMENITY_UUID"}'` | **200 OK** <br> `{"message": "Amenity added successfully"}` |
+| **5** | **Review**| **Note > 5** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/reviews/" -H "Content-Type: application/json" -d '{"rating": 6}'` | **400 Bad Request** <br> `{"error": "Rating must be between 1 and 5"}` |
+| **6** | **Global**| **ID inexistant** | `curl -i -X GET "http://127.0.0.1:5000/api/v1/users/non-existant-id"` | **404 Not Found** <br> `{"message": "User not found"}` |
 
-Project Vision and Scope
 
-The implementation in this part is focused on creating a functional and scalable foundation for the application. You will be working on:
 
-    Presentation Layer: Defining the services and API endpoints using Flask and flask-restx. You’ll structure the endpoints logically, ensuring clear paths and parameters for each operation.
+---
 
-    Business Logic Layer: Building the core models and logic that drive the application’s functionality. This includes defining relationships, handling data validation, and managing interactions between different components.
+##  5. Installation et Tests Automatisés
 
-At this stage, you won’t need to worry about user authentication or access control. However, you should ensure that the code is modular and organized, making it easy to integrate these features in Part 3.
-Learning Objectives
+### Lancement de l'application
+1. Installez les dépendances : `pip install -r requirements.txt`
+2. Lancez le serveur : `python run.py`
+3. Accédez à la documentation Swagger : `http://127.0.0.1:5000/api/v1/`
 
-This part of the project is designed to help you achieve the following learning outcomes:
-
-    Modular Design and Architecture: Learn how to structure a Python application using best practices for modularity and separation of concerns.
-    API Development with Flask and flask-restx: Gain hands-on experience in building RESTful APIs using Flask, focusing on creating well-documented and scalable endpoints.
-    Business Logic Implementation: Understand how to translate documented designs into working code, implementing core business logic in a structured and maintainable manner.
-    Data Serialization and Composition Handling: Practice returning extended attributes in API responses, handling nested and related data in a clear and efficient way.
-    Testing and Debugging: Develop skills in testing and validating APIs, ensuring that your endpoints handle requests correctly and return appropriate responses.
-
+### Exécution des tests unitaires (`unittest`)
+Nous utilisons des tests automatisés pour garantir la non-régression :
+```bash
+python3 -m unittest discover tests
