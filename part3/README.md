@@ -14,11 +14,11 @@ Welcome to Part 3 of the HBnB Project, where you will extend the backend of the 
 
 By the end of this part, you will:
 
-    - Implement JWT authentication to secure your API and manage user sessions.
-    - Enforce role-based access control to restrict access based on user roles (regular users vs. administrators).
-    - Replace in-memory repositories with a SQLite-based persistence layer using SQLAlchemy for development and configure MySQL for production.
-    - Design and visualize a relational database schema using mermaid.js to handle relationships between users, places, reviews, and amenities.
-    - Ensure the backend is secure, scalable, and provides reliable data storage for production environments.
+1. Implement JWT authentication to secure your API and manage user sessions.
+2. Enforce role-based access control to restrict access based on user roles (regular users vs. administrators).
+3. Replace in-memory repositories with a SQLite-based persistence layer using SQLAlchemy for development and configure MySQL for production.
+4. Design and visualize a relational database schema using mermaid.js to handle relationships between users, places, reviews, and amenities.
+5. Ensure the backend is secure, scalable, and provides reliable data storage for production environments.
 
 ## Project Context
 
