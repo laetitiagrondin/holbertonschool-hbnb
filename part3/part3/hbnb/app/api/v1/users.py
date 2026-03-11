@@ -21,10 +21,21 @@ class UserList(Resource):
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new user"""
+        """Crée un utilisateur public SANS token OU admin avec token."""
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt
         user_data = api.payload
         if not user_data:
             return {'error': 'Invalid input data'}, 400
+        
+         # Si un token est fourni, vérifier que c'est un admin
+        try:
+            verify_jwt_in_request(optional=True)
+            claims = get_jwt()
+            # Token présent mais pas admin → refus
+            if claims and not claims.get('is_admin', False):
+                return {'error': 'Admin privileges required'}, 403
+        except Exception:
+            pass
 
         try:
             existing_user = facade.get_user_by_email(user_data.get('email', ''))
@@ -86,11 +97,15 @@ class UserResource(Resource):
     @api.response(403, 'Action non autorisée')
     @api.response(404, 'User not found')
     def put(self, user_id):
-        """mise a jour utilisateur"""
+        """Mise à jour utilisateur — soi-même (sans email/password) ou admin (tout)."""
+        from flask_jwt_extended import get_jwt
         current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
 
-        # Vérification : le token doit appartenir à l'utilisateur ciblé
-        if current_user_id != user_id:
+
+        # Un utilisateur non-admin ne peut modifier que son propre profil
+        if not is_admin and current_user_id != user_id:
             return {'error': 'Unauthorized action'}, 403
 
         user_data = api.payload
@@ -98,11 +113,21 @@ class UserResource(Resource):
         if not user_data:
             return {'error': 'Invalid input data'}, 400
 
-        # Sécurité : email et password ne sont pas modifiables via ce endpoint
-        # - email : identifiant unique, sa modification nécessite une validation dédiée
-        # - password : doit passer par un endpoint sécurisé de changement de mot de passe
-        if 'email' in user_data or 'password' in user_data:
+        # Un utilisateur non-admin ne peut pas modifier email ni password
+        if not is_admin and ('email' in user_data or 'password' in user_data):
             return {'error': 'You cannot modify email or password'}, 400
+
+        # Admin : vérification unicité email si fourni
+        if is_admin and 'email' in user_data:
+            existing = facade.get_user_by_email(user_data['email'])
+            if existing and existing.id != user_id:
+                return {'error': 'Email already in use'}, 400
+
+        # Admin : hachage du password si fourni
+        if is_admin and 'password' in user_data:
+            user_data['password'] = bcrypt.generate_password_hash(
+                user_data['password']
+            ).decode('utf-8')
 
         try:
             # Vérification de l'existence de l'utilisateur en base
