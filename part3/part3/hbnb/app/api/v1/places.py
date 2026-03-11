@@ -84,13 +84,17 @@ class PlaceResource(Resource):
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        """Update a place's information"""
+        """Modifie un lieu — propriétaire ou admin."""
+        from flask_jwt_extended import get_jwt
         current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
         place = facade.get_place(place_id)
         if not place:
             return {"message": "Place not found"}, 404
-        # Vérification de la propriété : seul le propriétaire peut modifier
-        if place.owner.id != current_user_id:
+        # Vérification propriétaire bypassed si admin
+        if not is_admin and place.owner.id != current_user_id:
             return {'error': 'Action non autorisée'}, 403
         
         try:
