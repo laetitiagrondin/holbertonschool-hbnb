@@ -100,6 +100,19 @@ class HBnBFacade:
         # Validation de la note (rating)
         if not (1 <= review_data['rating'] <= 5):
             raise ValueError("Rating must be between 1 and 5")
+        
+         # l'auteur ne peut pas évaluer son propre lieu
+        if place.owner.id == review_data['user_id']:
+            raise PermissionError("Vous ne pouvez pas évaluer votre propre lieu")
+
+        # un seul avis par utilisateur par lieu
+        existing = [
+            r for r in self.review_repo.get_all()
+            if r.place.id == review_data['place_id']
+            and r.user.id == review_data['user_id']
+        ]
+        if existing:
+            raise ValueError("Vous avez déjà laissé un avis pour ce lieu")
 
         from app.models.review import Review
         new_review = Review(
