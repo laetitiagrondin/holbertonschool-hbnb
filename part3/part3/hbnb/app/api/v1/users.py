@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from app.extensions import bcrypt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('users', description='User operations')
 
@@ -77,37 +78,48 @@ class UserResource(Resource):
             'email': user.email
         }, 200
 
+    @jwt_required()
     @api.expect(user_model, validate=False)
-    @api.response(200, 'User details retrieved successfully')
-    @api.response(400, 'Email already registered')
+    @api.response(200, 'User updated successfully')
+    @api.response(400, 'Invalid input data')
+    @api.response(401, 'Token JWT manquant ou invalide')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'User not found')
     def put(self, user_id):
         """mise a jour utilisateur"""
+        current_user_id = get_jwt_identity()
+
+        # Vérification : le token doit appartenir à l'utilisateur ciblé
+        if current_user_id != user_id:
+            return {'error': 'Unauthorized action'}, 403
+
         user_data = api.payload
-        print("user_id:", user_id)
+
         if not user_data:
             return {'error': 'Invalid input data'}, 400
+
+        # Sécurité : email et password ne sont pas modifiables via ce endpoint
+        # - email : identifiant unique, sa modification nécessite une validation dédiée
+        # - password : doit passer par un endpoint sécurisé de changement de mot de passe
+        if 'email' in user_data or 'password' in user_data:
+            return {'error': 'You cannot modify email or password'}, 400
+
         try:
+            # Vérification de l'existence de l'utilisateur en base
             user = facade.get_user(user_id)
             if not user:
                 return {'error': 'User not found'}, 404
-            # Vérification email unique
-            existing_user = facade.get_user_by_email(user_data.get('email', ''))
-            if existing_user and existing_user.id != user_id:
-                return {'error': 'User already registered'}, 400
-            
-             # Hachage du password si fourni
-            if 'password' in user_data:
-                user_data['password'] = bcrypt.generate_password_hash(
-                    user_data['password']
-                ).decode('utf-8')
-                
+
+            # Mise à jour via la facade (seuls first_name et last_name sont modifiés)
             updated_user = facade.update_user(user_id, user_data)
+
+            # Retourne le profil mis à jour sans le password pour la sécurité
             return {
-                    'id': updated_user.id,
-                    'first_name': updated_user.first_name,
-                    'last_name': updated_user.last_name,
-                    'email': updated_user.email
-                    }, 200
+                'id': updated_user.id,
+                'first_name': updated_user.first_name,
+                'last_name': updated_user.last_name,
+                'email': updated_user.email
+            }, 200
         except ValueError as e:
-            return {'error': str(e)}, 400 # Transforme l'erreur du modèle en 400
+            # Erreur de validation levée 
+            return {'error': str(e)}, 400
