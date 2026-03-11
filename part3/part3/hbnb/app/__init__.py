@@ -27,4 +27,32 @@ def create_app(config_class="config.DevelopmentConfig"):
     api.add_namespace(places_ns, path='/api/v1/places')
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
     api.add_namespace(auth_ns, path='/api/v1/auth')
+
+    # Création de l'admin par défaut au démarrage
+    with app.app_context():
+        _create_admin()
+
     return app
+
+def _create_admin():
+    """
+    Crée un utilisateur administrateur par défaut si aucun n'existe.
+    Email    : admin@hbnb.com
+    Password : admin1234
+    """
+    from app.services import facade
+    from app.extensions import bcrypt
+
+    # On ne crée l'admin que s'il n'existe pas déjà
+    if facade.get_user_by_email('admin@hbnb.com'):
+        return
+
+    hashed = bcrypt.generate_password_hash('admin1234').decode('utf-8')
+    facade.create_user({
+        'first_name': 'Admin',
+        'last_name':  'HBnB',
+        'email':      'admin@hbnb.com',
+        'password':   hashed,
+        'is_admin':   True
+    })
+    print('>>> Administrateur créé : admin@hbnb.com / admin1234')
