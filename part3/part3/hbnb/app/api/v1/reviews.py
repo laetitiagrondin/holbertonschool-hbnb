@@ -60,15 +60,18 @@ class ReviewResource(Resource):
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data')
     def put(self, review_id):
-        """Update a review's information"""
+        """Modifie un avis — auteur ou admin."""
+        from flask_jwt_extended import get_jwt
         current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
 
         review = facade.get_review(review_id)
         if not review:
             return {'message': 'Review not found'}, 404
 
-        # Vérification : seul l'auteur peut modifier son avis
-        if review.user.id != current_user_id:
+        # Vérification auteur — bypassed si admin
+        if not is_admin and review.user_id != current_user_id:
             return {'error': 'Unauthorized action'}, 403
 
         try:
@@ -86,15 +89,18 @@ class ReviewResource(Resource):
     @api.response(403, 'Action non autorisée')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
-        """Delete a review"""
+        """Supprime un avis — auteur ou admin."""
+        from flask_jwt_extended import get_jwt
         current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
 
         review = facade.get_review(review_id)
         if not review:
             return {'message': 'Review not found'}, 404
 
-        # Vérification : seul l'auteur peut supprimer son avis
-        if review.user.id != current_user_id:
+         # Vérification auteur — bypassed si admin
+        if not is_admin and review.user_id != current_user_id:
             return {'error': 'Unauthorized action'}, 403
 
         facade.delete_review(review_id)
