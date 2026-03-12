@@ -35,6 +35,7 @@ def create_app(config_class="config.DevelopmentConfig"):
 
     # Création de l'admin par défaut au démarrage
     with app.app_context():
+        db.create_all()
         _create_admin()
 
     return app
