@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.services import facade
 
 api = Namespace('reviews', description='Review operations')
@@ -49,16 +49,24 @@ class ReviewResource(Resource):
             return {"message": "Review not found"}, 404
         return review.to_dict(), 200
 
+    @jwt_required()
     @api.expect(review_model)
+    @api.response(403, 'Action non autorisée')
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data')
     def put(self, review_id):
         """Update a review's information"""
+        current_user = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        review = facade.get_review(review_id)
+        if not review:
+            return {'erreur': 'Review not found'}, 404
+            if not is_admin and review.user_id != current_user_id:
+                return {'error': 'Action non autorisée'}, 403
         try:
             updated_review = facade.update_review(review_id, api.payload)
-            if not updated_review:
-                return {"message": "Review not found"}, 404
             return {
                 "review": updated_review.text,
                 "message": "Review updated successfully"
