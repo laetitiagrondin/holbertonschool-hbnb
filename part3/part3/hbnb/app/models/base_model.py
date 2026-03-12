@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """
 Module base_model
-=================
 Définit la classe abstraite ``base_model`` dont héritent toutes les entités
 du projet (User, Place, Review, Amenity).
 
@@ -9,64 +8,46 @@ Responsabilités de ce module :
     - Générer un identifiant universel unique (UUID v4) pour chaque instance.
     - Horodater automatiquement la création et les mises à jour.
     - Fournir des méthodes réutilisables de sauvegarde et de mise à jour en masse.
-
-Dépendances :
-    - ``uuid``     : génération d'identifiants UUID v4.
-    - ``datetime`` : horodatage ISO 8601.
 """
 
 import uuid
 from datetime import datetime
+from app.extensions import db
 
 
-class BaseModel:
+class BaseModel(db.Model):
     """
-    Classe de base partagée par toutes les entités du projet HBnB.
-
-    Attributs d'instance
-    --------------------
-    id : str
-        Identifiant unique au format UUID v4 (ex. "550e8400-e29b-41d4-a716-446655440000").
-        Stocké sous forme de chaîne pour faciliter la sérialisation JSON et le
-        stockage dans les dépôts en mémoire.
-    created_at : datetime
-        Horodatage de la création de l'objet.  Défini une seule fois à
-        l'instanciation et jamais modifié ensuite.
-    updated_at : datetime
-        Horodatage de la dernière modification.  Rafraîchi automatiquement par
-        ``save()`` à chaque mutation.
-
-    Pourquoi des UUIDs ?
-    --------------------
-    - **Unicité globale** : pas de collision entre plusieurs serveurs ou bases de données.
-    - **Sécurité** : non-séquentiels, difficiles à deviner (contrairement aux entiers auto-incrémentés).
-    - **Scalabilité** : les identifiants peuvent être générés côté client sans coordination serveur.
+    Classe abstraite SQLAlchemy — aucune table n'est créée pour elle.
+    Toutes les entités héritent de cette classe pour partager
+    les colonnes id, created_at et updated_at.
     """
+    __abstract__ = True  # SQLAlchemy ne crée pas de table pour cette classe
 
-    def __init__(self):
-        """
-        Initialise les trois attributs communs à toutes les entités.
-        - ``id``         : UUID v4 converti en chaîne.
-        - ``created_at`` : instant présent (datetime.now()).
-        - ``updated_at`` : identique à ``created_at`` à la création.
-        """
-        # Génère un UUID v4 et le convertit en chaîne de caractères
-        self.id = str(uuid.uuid4())
-        now = datetime.now()
-        # Enregistre l'instant de création — ne sera jamais modifié
-        self.created_at = now
+    # Clé primaire UUID sous forme de chaîne (36 caractères)
+    id = db.Column(
+        db.String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4())
+    )
 
-        # Initialisé à la même valeur que created_at ; sera mis à jour
-        # à chaque appel à save()
-        self.updated_at = now
+    # Horodatage de création — défini une seule fois à l'instanciation
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
 
-    # ------------------------------------------------------------------
-    # Méthodes de mutation
-    # ------------------------------------------------------------------
+    # Horodatage de dernière modification — mis à jour automatiquement
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
 
     def save(self):
         """
-        Rafraîchit le champ ``updated_at`` à l'instant courant.
+        Rafraîchit le champ updated_at à l'instant courant.
         Doit être appelée après chaque modification d'un attribut afin de
         garder une trace fiable de la dernière mise à jour.
         """
