@@ -74,12 +74,20 @@ class UserResource(Resource):
             'email': user.email
         }, 200
 
+    @jwt_required()
     @api.expect(user_model, validate=False)
     @api.response(200, 'User details retrieved successfully')
     @api.response(400, 'Email already registered')
     @api.response(404, 'User not found')
     def put(self, user_id):
-        print("user_id:", user_id)
+        current_user = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        if not is_admin and current_user != user_id:
+            return {'error': 'Unauthorized action.'}, 403
+        user_data = api.payload
+        if not is_admin and ('email' in user_data or 'password' in user_data):
+            return {"error": "You cannot modify email or password."}, 400
         try:
             user = facade.get_user(user_id)
             if not user:
