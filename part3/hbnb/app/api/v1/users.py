@@ -22,7 +22,7 @@ class UserList(Resource):
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new user"""
+        """Création d'un utilisateur."""
         user_data = api.payload
         if not user_data:
             return {'error': 'Invalid input data'}, 400
