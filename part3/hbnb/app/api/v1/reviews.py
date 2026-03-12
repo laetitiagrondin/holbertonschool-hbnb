@@ -74,11 +74,19 @@ class ReviewResource(Resource):
         except ValueError as e:
             return {"message": str(e)}, 400
 
+    @jwt_required()
     @api.response(200, 'Review deleted successfully')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review"""
-        success = facade.delete_review(review_id)
-        if not success:
-            return {"message": "Review not found"}, 404
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        review = facade.get_review(review_id)
+        if not review:
+            return {"error": "Review not found"}, 404
+        if not is_admin and review.user_id != current_user_id:
+            return {'erreur': 'Action non autorisée'}, 403
+        facade.delete_review(review_id)
         return {"message": "Review deleted successfully"}, 200
