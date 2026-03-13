@@ -23,27 +23,21 @@ class BaseModel(db.Model):
     """
     __abstract__ = True  # SQLAlchemy ne crée pas de table pour cette classe
 
-    # Clé primaire UUID sous forme de chaîne (36 caractères)
-    id = db.Column(
-        db.String(36),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4())
-    )
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-    # Horodatage de création — défini une seule fois à l'instanciation
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        nullable=False
-    )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Force les valeurs immédiatement sans attendre le commit SQLAlchemy
+        if not self.id:
+            self.id = str(uuid.uuid4())
+        now = datetime.utcnow()
+        if not self.created_at:
+            self.created_at = now
+        if not self.updated_at:
+            self.updated_at = now
 
-    # Horodatage de dernière modification — mis à jour automatiquement
-    updated_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-        nullable=False
-    )
 
     def save(self):
         """
