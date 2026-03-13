@@ -18,6 +18,13 @@ from app.models.base_model import BaseModel
 from app.models.user import User
 
 
+place_amenity = db.Table(
+    "place_amenity",
+    db.Column("place_id", db.String(36), db.ForeignKey("places.id"), primary_key=True),
+    db.Column("amenity_id", db.String(36), db.ForeignKey("amenities.id"), primary_key=True)
+)
+
+
 class Place(BaseModel):
     """
     Représente une annonce de location sur la plateforme HBnB.
@@ -31,40 +38,35 @@ class Place(BaseModel):
     price       = db.Column(db.Float, nullable=False)
     latitude    = db.Column(db.Float, nullable=False)
     longitude   = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    # Relation one-to-many : User -> Places
+    owner = db.relationship('User', backref=db.backref('places', lazy=True))
+    # Relation one-to-many : Place -> Reviews
+    reviews = db.relationship('Review', backref='place', lazy=True, cascade='all, delete-orphan')
+    # Relation many-to-many : Place <-> Amenity
+    amenities = db.relationship('Amenity', secondary=place_amenity,
+                                lazy='subquery',
+                                backref=db.backref('places', lazy=True))
     
-    
-    def __init__(
-        self,
-        title: str,
-        price: float,
-        latitude: float,
-        longitude: float,
-        owner: User,
-        description: str = "",# ← optionnel avec valeur par défaut
-        **kwargs
-    ):
+    def __init__(self, title, price, latitude, longitude,
+                 owner=None, owner_id=None, description="", **kwargs):
         """
         Initialise un nouveau lieu et valide immédiatement ses attributs.
         """
         # Initialise id, created_at et updated_at via le constructeur parent
         super().__init__(**kwargs)
-
         self.title       = title
         self.description = description
-
         # Conversion explicite en float pour accepter les entiers passés en paramètre
         self.price     = float(price)
         self.latitude  = float(latitude)
         self.longitude = float(longitude)
-
         # Référence vers l'instance User propriétaire du lieu
-        self.owner = owner
-
+        if owner:
+            self.owner    = owner
+        elif owner_id:
+            self.owner_id = owner_id
         # Liste des avis (Review) associés à ce lieu — initialement vide
-        self.reviews: list = []
-
-        # Liste des équipements (Amenity) disponibles — initialement vide
-        self.amenities: list = []
 
     @db.validates('title')
     def validate_title(self, key, value):
@@ -89,34 +91,10 @@ class Place(BaseModel):
     def validate_longitude(self, key, value):
         if not (-180.0 <= float(value) <= 180.0):
             raise ValueError("La longitude doit être entre -180.0 et 180.0.")
-        return float(value)
+        return float(value)  
 
-    @property
-    def owner(self):
-        """ Getter pour le propriétaire. """
-        return self.__owner
-
-    @owner.setter
-    def owner(self, value):
-        """ Setter pour le propriétaire (doit être une instance de User). """
-        if not isinstance(value, User):
-            raise ValueError(
-                "Le champ 'owner' doit être une instance valide de User."
-            )
-        self.__owner = value
-
-    def add_review(self, review):
-        """ Ajoute une critique à la liste. """
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity):
-        """ Ajoute un équipement à la liste. """
-        self.amenities.append(amenity)  
-
-    
     # Gestion des relations
     
-
     def add_review(self, review) -> None:
         """
         Rattache un avis à ce lieu.
@@ -190,20 +168,14 @@ class Place(BaseModel):
     def update(self, data: dict):
         """
         Met à jour les attributs modifiables du lieu.
-
-        Seuls les champs ``title``, ``description``, ``price``, ``latitude``
-        et ``longitude`` peuvent être modifiés.  Le propriétaire (``owner``)
+        Seuls les champs title, description, price, latitude
+        et longitude peuvent être modifiés.  Le propriétaire (owner)
         ne peut pas être changé via cette méthode.
-
         La validation est relancée après chaque mise à jour.
-
         Paramètres
-        
         data : dict
             Dictionnaire des champs à modifier et de leurs nouvelles valeurs.
-
         Lève
-        
         ValueError
             Si les nouvelles valeurs ne respectent pas les contraintes.
         """
@@ -236,7 +208,6 @@ class Place(BaseModel):
         last_name, email pour l'owner ; id et name pour chaque amenity).
 
         Retour
-        ------
         dict
             Dictionnaire complet du lieu avec owner et amenities développés.
         """
@@ -275,7 +246,6 @@ class Place(BaseModel):
         une liste compacte sans surcharger la réponse avec tous les détails.
 
         Retour
-        ------
         dict
             Dictionnaire contenant uniquement id, title, price, latitude
             et longitude.
