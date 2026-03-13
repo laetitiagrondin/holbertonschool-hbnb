@@ -32,8 +32,14 @@ class Review(BaseModel):
     text   = db.Column(db.String(1000), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     
+    # Clés étrangères
+    place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
+    user_id  = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+
+    # Relation one-to-many : User -> Reviews
+    user = db.relationship('User', backref=db.backref('reviews', lazy=True))
     
-    def __init__(self, text: str, rating: int, place=None, user=None, **kwargs):
+    def __init__(self, text, rating, place=None, user=None, place_id=None, user_id=None, **kwargs):
         """
         Initialise un nouvel avis et valide immédiatement ses attributs.
         Lève
@@ -43,14 +49,18 @@ class Review(BaseModel):
         """
         # Initialise id, created_at et updated_at via le constructeur parent
         super().__init__(**kwargs)
-
         self.text = text
         # Conversion en int pour accepter les chaînes numériques éventuelles
         self.rating = int(rating)
-
-        # Références vers les entités liées
-        self.place = place  # Lieu évalué par cet avis
-        self.user  = user   # Auteur de l'avis
+        if place: 
+            self.place = place
+        elif place_id: 
+            self.place_id = place_id
+            
+        if user: 
+            self.user = user
+        elif user_id: 
+            self.user_id = user_id
 
     @db.validates('text')
     def validate_text(self, key, value):
@@ -60,47 +70,10 @@ class Review(BaseModel):
 
     @db.validates('rating')
     def validate_rating(self, key, value):
-        if not isinstance(int(value), int) or not (1 <= int(value) <= 5):
+        val = int(value)
+        if not (1 <= val <= 5):
             raise ValueError("La note doit être entre 1 et 5.")
-        return int(value)
-
-    @property
-    def place(self):
-        """ Getter pour le lieu associé. """
-        return self.__place
-
-    @place.setter
-    def place(self, value):
-        """ Setter pour le lieu (doit être une instance de Place). """
-        if not isinstance(value, Place):
-            raise ValueError(
-                "Le champ 'place' doit être une instance valide de Place."
-            )
-        self.__place = value
-
-    @property
-    def user(self):
-        """ Getter pour l'auteur de l'avis. """
-        return self.__user
-
-    @user.setter
-    def user(self, value):
-        """ Setter pour l'auteur (doit être une instance de User). """
-        if not isinstance(value, User):
-            raise ValueError(
-                "Le champ 'user' doit être une instance valide de User."
-            )
-        self.__user = value
-        
-    @property
-    def user_id(self):
-        """ Accès public à l'ID de l'auteur """
-        return self.user.id
-
-    @property
-    def place_id(self):
-        """ Accès public à l'ID du lieu """
-        return self.place.id
+        return val
 
     
     # Mise à jour
@@ -110,16 +83,16 @@ class Review(BaseModel):
         """
         Met à jour les attributs modifiables de l'avis.
 
-        Seuls les champs ``text`` et ``rating`` peuvent être modifiés.
-        Les références ``place`` et ``user`` sont immuables après création.
+        Seuls les champs text et rating peuvent être modifiés.
+        Les références place et user` sont immuables après création.
 
         Paramètres
-        ----------
+        
         data : dict
             Dictionnaire des champs à modifier.
 
         Lève
-        ----
+        
         ValueError
             Si les nouvelles valeurs ne respectent pas les contraintes.
         """
@@ -130,7 +103,6 @@ class Review(BaseModel):
         if "rating" in data:
             # S'assure que la note est bien un entier
             self.rating = int(data["rating"])
-
         # Rafraîchit l'horodatage de dernière modification
         self.save()
 
@@ -141,31 +113,25 @@ class Review(BaseModel):
     def to_dict(self) -> dict:
         """
         Sérialise l'avis sous forme de dictionnaire JSON-compatible.
-
         Retourne une représentation **étendue** : les références au lieu et
         à l'utilisateur incluent leurs informations de base (id, titre ou
         prénom/nom) plutôt que de simples UUIDs.
-
         Retour
-        ------
         dict
             Dictionnaire complet de l'avis avec place et user développés.
         """
         # Récupère le dictionnaire de base (id, created_at, updated_at)
         base = super().to_dict()
-
         # Ajoute les attributs spécifiques à l'avis
         base.update({
             "text":   self.text,
             "rating": self.rating,
-
             # Sérialisation partielle du lieu (évite la récursion infinie
             # si Place.to_dict() incluait à son tour ses reviews)
             "place": {
                 "id":    self.place.id,
                 "title": self.place.title,
             },
-
             # Sérialisation partielle de l'auteur
             "user": {
                 "id":         self.user.id,
