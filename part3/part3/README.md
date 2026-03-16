@@ -1,61 +1,186 @@
-#  HBnB Project - Phase 2 : Logique Métier & API REST
+# HBnB Project - Part 3 : Authentification, Autorisation & Persistance SQLAlchemy
 
-##  1. Introduction
-Bienvenue dans la Phase 2 du projet HBnB. Cette étape consiste à transformer notre conception architecturale en une application fonctionnelle en utilisant **Python** et **Flask**. L'objectif est de construire les couches de présentation et de logique d'entreprise, tout en définissant les points de terminaison API essentiels.
+## 1. Introduction
 
-##  2. Architecture et Vision
-Le projet repose sur une architecture modulaire garantissant une séparation claire des responsabilités :
-
-* **Couche Logique Métier (Business Logic) :** Définit les entités (`User`, `Place`, `Review`, `Amenity`), gère les relations et applique les règles de validation.
-* **Couche de Présentation :** Expose les services via une API RESTful utilisant `Flask-RESTx`.
-* **Pattern Façade :** Centralise la communication entre l'API et la logique métier pour un code plus propre et maintenable.
-
-
+La Part 3 du projet HBnB étend l'application construite en Part 2 en ajoutant :
+- **L'authentification JWT** pour sécuriser les endpoints
+- **Le contrôle d'accès par rôle (RBAC)** pour les administrateurs
+- **La persistance SQLAlchemy** pour remplacer le stockage en mémoire
+- **Un schéma SQL** documentant la structure de la base de données
 
 ---
 
-##  3. Règles de Validation (Business Rules)
-Chaque modèle d'entité intègre une logique de validation rigoureuse avant tout stockage :
+## 2. Stack Technique
 
-| Entité | Attribut | Règle de Validation |
-| :--- | :--- | :--- |
-| **User** | `first_name`, `last_name`, `email` | Ne doivent pas être vides. |
-| **User** | `email` | Doit respecter un format d'e-mail valide (Regex). |
-| **Place** | `title` | Ne doit pas être vide. |
-| **Place** | `price` | Doit être un nombre strictement positif (> 0). |
-| **Place** | `latitude` | Doit être comprise entre **-90.0** et **90.0**. |
-| **Place** | `longitude` | Doit être comprise entre **-180.0** et **180.0**. |
-| **Review** | `text` | Ne doit pas être vide. |
-| **Review** | `rating` | Doit être un entier compris entre **1** et **5**. |
+| Outil | Rôle |
+|---|---|
+| Flask | Framework web |
+| Flask-RESTx | API REST + Swagger |
+| Flask-JWT-Extended | Authentification JWT |
+| Flask-Bcrypt | Hachage des mots de passe |
+| Flask-SQLAlchemy | ORM pour la persistance |
+| SQLite | Base de données (développement) |
 
 ---
 
-##  4. Registre des Tests API (Endpoints & cURL)
-
-Ce tableau documente le succès des tests de boîte noire effectués. 
-*Note : Les UUID utilisés sont des exemples basés sur un flux réel.*
-
-| Ordre | Module | Objectif | Commande cURL | Réponse Attendue (HTTP & JSON) |
-| :--- | :--- | :--- | :--- | :--- |
-| **1** | **User** | **Création (Succès)** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"}'` | **201 Created** <br> `{"id": "550e8400...", "email": "john.doe@example.com"}` |
-| **2** | **User** | **Données Invalides** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{"first_name": "", "email": "invalid-email"}'` | **400 Bad Request** <br> `{"error": "Invalid input data"}` |
-| **3** | **Place** | **Latitude hors portée**| `curl -i -X POST "http://127.0.0.1:5000/api/v1/places/" -H "Content-Type: application/json" -d '{"title": "Villa", "latitude": 150.0}'` | **400 Bad Request** <br> `{"error": "Latitude must be between -90 and 90"}` |
-| **4** | **Place** | **Liaison Amenity** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/places/PLACE_UUID/amenities" -H "Content-Type: application/json" -d '{"amenity_id": "AMENITY_UUID"}'` | **200 OK** <br> `{"message": "Amenity added successfully"}` |
-| **5** | **Review**| **Note > 5** | `curl -i -X POST "http://127.0.0.1:5000/api/v1/reviews/" -H "Content-Type: application/json" -d '{"rating": 6}'` | **400 Bad Request** <br> `{"error": "Rating must be between 1 and 5"}` |
-| **6** | **Global**| **ID inexistant** | `curl -i -X GET "http://127.0.0.1:5000/api/v1/users/non-existant-id"` | **404 Not Found** <br> `{"message": "User not found"}` |
-
-
+## 3. Architecture
+```
+hbnb/
+├── run.py
+├── config.py
+├── schema.sql
+├── initial_data.sql
+├── ERD.md
+├── requirements.txt
+└── app/
+    ├── __init__.py
+    ├── extensions.py
+    ├── models/
+    │   ├── base_model.py
+    │   ├── user.py
+    │   ├── place.py
+    │   ├── review.py
+    │   └── amenity.py
+    ├── persistence/
+    │   └── repository.py
+    ├── services/
+    │   ├── facade.py
+    │   └── repositories/
+    │       └── user_repository.py
+    └── api/v1/
+        ├── auth.py
+        ├── users.py
+        ├── places.py
+        ├── reviews.py
+        └── amenities.py
+```
 
 ---
 
-##  5. Installation et Tests Automatisés
-
-### Lancement de l'application
-1. Installez les dépendances : `pip install -r requirements.txt`
-2. Lancez le serveur : `python run.py`
-3. Accédez à la documentation Swagger : `http://127.0.0.1:5000/api/v1/`
-
-### Exécution des tests unitaires (`unittest`)
-Nous utilisons des tests automatisés pour garantir la non-régression :
+## 4. Installation
 ```bash
-python3 -m unittest discover tests
+git clone https://github.com/laetitiagrondin/holbertonschool-hbnb.git
+cd holbertonschool-hbnb/part3/part3/hbnb
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+python3 run.py
+```
+
+La base de données est créée automatiquement au démarrage.
+Administrateur par défaut :
+- **Email** : admin@hbnb.com
+- **Password** : admin1234
+
+---
+
+## 5. Tâches réalisées
+
+### Tâche 0 — Mise en place du projet
+Configuration de Flask, Flask-RESTx, structure des dossiers.
+
+### Tâche 1 — Implémentation des modèles
+Création des entités User, Place, Review, Amenity héritant de BaseModel avec validation.
+
+### Tâche 2 — Pattern Repository
+Implémentation de InMemoryRepository et de l'interface Repository.
+
+### Tâche 3 — Authentification JWT
+- Endpoint POST /api/v1/auth/login retournant un token JWT
+- Sécurisation des endpoints places, reviews, users
+- Injection du user_id depuis le token JWT
+
+### Tâche 4 — Contrôle d'accès Admin (RBAC)
+- Claim is_admin dans le token JWT
+- Admin peut modifier n'importe quel utilisateur, lieu ou avis
+- Seul l'admin peut créer/modifier des amenities
+
+### Tâche 5 — SQLAlchemy Repository
+- Ajout de flask-sqlalchemy
+- Création de SQLAlchemyRepository
+- Configuration SQLALCHEMY_DATABASE_URI
+
+### Tâche 6 — Mapping User vers SQLAlchemy
+- BaseModel hérite de db.Model
+- User mappé avec colonnes et validateurs
+- UserRepository avec get_user_by_email
+
+### Tâche 7 — Mapping Place, Review, Amenity
+- Place, Review, Amenity mappés vers SQLAlchemy
+- Tables créées automatiquement
+
+### Tâche 8 — Relations SQLAlchemy
+
+| Relation | Type |
+|---|---|
+| User -> Place | One-to-Many |
+| User -> Review | One-to-Many |
+| Place -> Review | One-to-Many |
+| Place <-> Amenity | Many-to-Many |
+
+### Tâche 9 — Scripts SQL
+- schema.sql : création du schéma complet
+- initial_data.sql : admin + 3 amenities (WiFi, Piscine, Climatisation)
+
+### Tâche 10 — Diagramme ER
+Diagramme Mermaid.js dans ERD.md représentant toutes les entités et relations.
+
+---
+
+## 6. Endpoints API
+
+| Méthode | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | /api/v1/auth/login | Non | Connexion + token JWT |
+| GET | /api/v1/users/ | Non | Liste des utilisateurs |
+| POST | /api/v1/users/ | Non/Admin | Créer un utilisateur |
+| GET | /api/v1/users/<id> | Non | Détail utilisateur |
+| PUT | /api/v1/users/<id> | JWT | Modifier son profil |
+| GET | /api/v1/places/ | Non | Liste des lieux |
+| POST | /api/v1/places/ | JWT | Créer un lieu |
+| GET | /api/v1/places/<id> | Non | Détail lieu |
+| PUT | /api/v1/places/<id> | JWT | Modifier un lieu |
+| GET | /api/v1/reviews/ | Non | Liste des avis |
+| POST | /api/v1/reviews/ | JWT | Créer un avis |
+| GET | /api/v1/reviews/<id> | Non | Détail avis |
+| PUT | /api/v1/reviews/<id> | JWT | Modifier un avis |
+| DELETE | /api/v1/reviews/<id> | JWT | Supprimer un avis |
+| GET | /api/v1/amenities/ | Non | Liste des équipements |
+| POST | /api/v1/amenities/ | Admin | Créer un équipement |
+| PUT | /api/v1/amenities/<id> | Admin | Modifier un équipement |
+
+---
+
+## 7. Tests rapides
+```bash
+# Login admin
+curl -s -X POST "http://127.0.0.1:5000/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@hbnb.com", "password": "admin1234"}'
+
+# Créer un utilisateur
+curl -s -X POST "http://127.0.0.1:5000/api/v1/users/" \
+  -H "Content-Type: application/json" \
+  -d '{"first_name": "John", "last_name": "Doe", "email": "john@test.com", "password": "pass1234"}'
+
+# Lister les lieux
+curl -s "http://127.0.0.1:5000/api/v1/places/"
+```
+
+---
+
+## 8. Base de données
+
+La base SQLite est créée automatiquement dans instance/development.db.
+
+Pour initialiser avec les scripts SQL bruts :
+```bash
+sqlite3 test.db < schema.sql
+sqlite3 test.db < initial_data.sql
+```
+
+---
+
+## 9. Auteurs
+
+Projet réalisé dans le cadre du cursus Holberton School.
