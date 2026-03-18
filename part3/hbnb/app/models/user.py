@@ -20,8 +20,10 @@ Dépendances :
 """
 
 import re
+import uuid
 from app.models.base_model import BaseModel
-from app import bcrypt
+from app import db, bcrypt
+from .base_model import BaseModel
 
 
 class User(BaseModel):
@@ -48,6 +50,14 @@ class User(BaseModel):
     # Accepte les caractères alphanumériques, points, tirets et signes +
     # avant le @, puis un domaine avec une extension d'au moins 2 lettres.
     __EMAIL_RE = re.compile(r"^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$")
+
+    __tablename__ = "users"
+
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __init__(
         self,
