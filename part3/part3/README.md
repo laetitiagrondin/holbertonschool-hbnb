@@ -183,4 +183,4 @@ sqlite3 test.db < initial_data.sql
 
 ## 9. Auteurs
 
-Projet réalisé dans le cadre du cursus Holberton School.
+Projet réalisé par Laetitia Grondin et Luidgi Watson
