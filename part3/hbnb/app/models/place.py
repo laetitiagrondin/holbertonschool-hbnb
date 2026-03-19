@@ -26,6 +26,11 @@ from app import db
 from app.models.base_model import BaseModel
 from app.models.user import User
 
+place_amenity = db.Table(
+    "place_amenity",
+    db.Column("place_id", db.String(36), db.ForeignKey("places.id"), primary_key=True),
+    db.Column("amenity_id", db.String(36), db.ForeignKey("amenities.id"), primary_key=True)
+)
 
 class Place(BaseModel):
     """
@@ -61,16 +66,17 @@ class Place(BaseModel):
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+    user_id = db.Column(String(36), ForeignKey('users.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('places', lazy=True))
+    reviews = db.relationship('Review', backref='place', lazy=True)
+    amenities = db.relationship('Amenity',
+                                secondary=place_amenity,
+                                lazy='subquery',
+                                backref=db.backref('places', lazy=True))
 
-    def __init__(
-        self,
-        title: str,
-        price: float,
-        latitude: float,
-        longitude: float,
-        owner: User,
-        description: str = "", # ← optionnel avec valeur par défaut
-    ):
+    def __init__(self, title: str, price: float,
+                 latitude: float, longitude: float, owner: User,
+                 description: str = ""):
         """
         Initialise un nouveau lieu et valide immédiatement ses attributs.
 
@@ -139,19 +145,6 @@ class Place(BaseModel):
         if not (-180.0 <= float(value) <= 180.0):
             raise ValueError("La longitude doit être entre -180.0 et 180.0.")
         return float(value)
-
-    @property
-    def owner(self):
-        """ Getter pour le propriétaire. """
-        return self.__owner
-
-    def add_review(self, review):
-        """ Ajoute une critique à la liste. """
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity):
-        """ Ajoute un équipement à la liste. """
-        self.amenities.append(amenity)  
 
     # ------------------------------------------------------------------
     # Gestion des relations

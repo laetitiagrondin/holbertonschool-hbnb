@@ -57,6 +57,11 @@ class Review(BaseModel):
     text = db.Column(db.String(1000), nullable=False)
     rating = db.COlumn(db.Integer, nullable=False)
 
+    place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+
+    user = db.relationship('User', backref=db.backref('reviews', lazy=True))
+
     def __init__(self, text: str, rating: int, place: Place, user: User):
         """
         Initialise un nouvel avis et valide immédiatement ses attributs.

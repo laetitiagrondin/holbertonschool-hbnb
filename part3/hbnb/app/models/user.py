@@ -20,10 +20,8 @@ Dépendances :
 """
 
 import re
-import uuid
 from app.models.base_model import BaseModel
 from app import db, bcrypt
-from .base_model import BaseModel
 
 
 class User(BaseModel):
@@ -58,15 +56,12 @@ class User(BaseModel):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    places = db.relationship("Place", backref="owner", lazy=True)
+    reviews = relationship("Review", backref="author", lazy=True)
 
-    def __init__(
-        self,
-        first_name: str,
-        last_name: str,
-        email: str,
-        password: str = None,
-        is_admin: bool = False,
-    ):
+    def __init__(self, first_name: str,
+                 last_name: str, email: str,
+                 password: str = None, is_admin: bool = False):
         """
         Initialise un nouvel utilisateur et valide immédiatement ses attributs.
 
@@ -97,66 +92,34 @@ class User(BaseModel):
         self.is_admin = bool(is_admin)
 
         # Validation immédiate : lève ValueError si une règle est violée
-    @property
-    def first_name(self):
-        """ Getter pour le prénom. """
-        return self.__first_name
-
-    @first_name.setter
-    def first_name(self, value):
-        """ Setter pour le prénom (max 50 caractères). """
+    @db.validates('first_name')
+    def validate_first_name(self, key, value):
         if not value or len(value) > 50:
-            raise ValueError(
-                "Le prénom est obligatoire (max 50 caractères)."
-            )
-        self.__first_name = value
+            raise ValueError("Le prénom est obligatoire (max 50 caractères).")
+        return value
 
-    @property
-    def last_name(self):
-        """ Getter pour le nom. """
-        return self.__last_name
-
-    @last_name.setter
-    def last_name(self, value):
-        """ Setter pour le nom (max 50 caractères). """
+    @db.validates('last_name')
+    def validate_last_name(self, key, value):
         if not value or len(value) > 50:
-            raise ValueError(
-                "Le nom est obligatoire (max 50 caractères)."
-            )
-        self.__last_name = value
+            raise ValueError("Le nom est obligatoire (max 50 caractères).")
+        return value
 
-    @property
-    def email(self):
-        """ Getter pour l'e-mail. """
-        return self.__email
-
-    @email.setter
-    def email(self, value):
-        """ Setter pour l'e-mail avec validation Regex. """
+    @db.validates('email')
+    def email(self, key, value):
         if not value or not self.__EMAIL_RE.match(value):
-            raise ValueError(
-                f"L'adresse e-mail '{value}' est invalide."
-            )
-        self.__email = value
+            raise ValueError(f"L'adresse e-mail '{value}' est invalide.")
+        return value
 
-    @property
-    def is_admin(self):
-        """ Getter pour le statut administrateur. """
-        return self.__is_admin
-
-    @is_admin.setter
-    def is_admin(self, value):
-        """ Setter pour le statut administrateur. """
+    @db.validates('is_admin')
+    def is_admin(self, key, value):
         if not isinstance(value, bool):
             raise ValueError("Le statut is_admin doit être un booléen.")
-        self.__is_admin = value
+        return bool(value)
 
     def hash_password(self, password):
-        """Hashes the password before storing it."""
             self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
-        """Verifies if the provided password matches the hashed password."""
         return bcrypt.check_password_hash(self.password, password)
 
 
