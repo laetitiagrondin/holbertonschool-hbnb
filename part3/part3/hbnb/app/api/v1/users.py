@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from app.extensions import bcrypt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('users', description='User operations')
 
@@ -20,10 +21,21 @@ class UserList(Resource):
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new user"""
+        """Crée un utilisateur public SANS token OU admin avec token."""
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt
         user_data = api.payload
         if not user_data:
             return {'error': 'Invalid input data'}, 400
+        
+         # Si un token est fourni, vérifier que c'est un admin
+        try:
+            verify_jwt_in_request(optional=True)
+            claims = get_jwt()
+            # Token présent mais pas admin → refus
+            if claims and not claims.get('is_admin', False):
+                return {'error': 'Admin privileges required'}, 403
+        except Exception:
+            pass
 
         try:
             existing_user = facade.get_user_by_email(user_data.get('email', ''))
@@ -77,37 +89,62 @@ class UserResource(Resource):
             'email': user.email
         }, 200
 
+    @jwt_required()
     @api.expect(user_model, validate=False)
-    @api.response(200, 'User details retrieved successfully')
-    @api.response(400, 'Email already registered')
+    @api.response(200, 'User updated successfully')
+    @api.response(400, 'Invalid input data')
+    @api.response(401, 'Token JWT manquant ou invalide')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'User not found')
     def put(self, user_id):
-        """mise a jour utilisateur"""
+        """Mise à jour utilisateur — soi-même (sans email/password) ou admin (tout)."""
+        from flask_jwt_extended import get_jwt
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+
+
+        # Un utilisateur non-admin ne peut modifier que son propre profil
+        if not is_admin and current_user_id != user_id:
+            return {'error': 'Unauthorized action'}, 403
+
         user_data = api.payload
-        print("user_id:", user_id)
+
         if not user_data:
             return {'error': 'Invalid input data'}, 400
+
+        # Un utilisateur non-admin ne peut pas modifier email ni password
+        if not is_admin and ('email' in user_data or 'password' in user_data):
+            return {'error': 'You cannot modify email or password'}, 400
+
+        # Admin : vérification unicité email si fourni
+        if is_admin and 'email' in user_data:
+            existing = facade.get_user_by_email(user_data['email'])
+            if existing and existing.id != user_id:
+                return {'error': 'Email already in use'}, 400
+
+        # Admin : hachage du password si fourni
+        if is_admin and 'password' in user_data:
+            user_data['password'] = bcrypt.generate_password_hash(
+                user_data['password']
+            ).decode('utf-8')
+
         try:
+            # Vérification de l'existence de l'utilisateur en base
             user = facade.get_user(user_id)
             if not user:
                 return {'error': 'User not found'}, 404
-            # Vérification email unique
-            existing_user = facade.get_user_by_email(user_data.get('email', ''))
-            if existing_user and existing_user.id != user_id:
-                return {'error': 'User already registered'}, 400
-            
-             # Hachage du password si fourni
-            if 'password' in user_data:
-                user_data['password'] = bcrypt.generate_password_hash(
-                    user_data['password']
-                ).decode('utf-8')
-                
+
+            # Mise à jour via la facade (seuls first_name et last_name sont modifiés)
             updated_user = facade.update_user(user_id, user_data)
+
+            # Retourne le profil mis à jour sans le password pour la sécurité
             return {
-                    'id': updated_user.id,
-                    'first_name': updated_user.first_name,
-                    'last_name': updated_user.last_name,
-                    'email': updated_user.email
-                    }, 200
+                'id': updated_user.id,
+                'first_name': updated_user.first_name,
+                'last_name': updated_user.last_name,
+                'email': updated_user.email
+            }, 200
         except ValueError as e:
-            return {'error': str(e)}, 400 # Transforme l'erreur du modèle en 400
+            # Erreur de validation levée 
+            return {'error': str(e)}, 400

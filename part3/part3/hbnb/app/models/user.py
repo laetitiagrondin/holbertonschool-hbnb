@@ -21,7 +21,7 @@ Dépendances :
 
 import re
 from app.models.base_model import BaseModel
-from app.extensions import bcrypt
+from app.extensions import bcrypt, db
 
 
 class User(BaseModel):
@@ -29,25 +29,26 @@ class User(BaseModel):
     Représente un utilisateur enregistré sur la plateforme HBnB.
 
     Hérite de ``BaseModel`` pour l'identifiant UUID et les horodatages.
-
-    Attributs d'instance
-    --------------------
-    first_name : str
-        Prénom de l'utilisateur.  Requis, 1 à 50 caractères.
-    last_name : str
-        Nom de famille de l'utilisateur.  Requis, 1 à 50 caractères.
-    email : str
-        Adresse e-mail unique de l'utilisateur.  Doit respecter le format
-        standard (ex. "alice@exemple.fr").
-    is_admin : bool
-        Indique si l'utilisateur possède les droits d'administration.
-        ``False`` par défaut.
+    Colonnes
+    first_name : str (max 50)
+    last_name  : str (max 50)
+    email      : str (max 120, unique)
+    password   : str (haché bcrypt)
+    is_admin   : bool (défaut False)
     """
-
+    
     # Expression régulière pour valider le format d'une adresse e-mail.
     # Accepte les caractères alphanumériques, points, tirets et signes +
     # avant le @, puis un domaine avec une extension d'au moins 2 lettres.
-    __EMAIL_RE = re.compile(r"^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$")
+    _EMAIL_RE = re.compile(r"^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$")
+    
+    __tablename__ = 'users'
+
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(
         self,
@@ -56,6 +57,7 @@ class User(BaseModel):
         email: str,
         password: str = None,
         is_admin: bool = False,
+        **kwargs
     ):
         """
         Initialise un nouvel utilisateur et valide immédiatement ses attributs.
@@ -68,64 +70,37 @@ class User(BaseModel):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = password
-        # bool() garantit que la valeur est bien un booléen même si on passe 1 ou 0
         self.is_admin = bool(is_admin)
+        if password:
+            self.password = password
 
-        # Validation immédiate : lève ValueError si une règle est violée
-    @property
-    def first_name(self):
-        """ Getter pour le prénom. """
-        return self.__first_name
-
-    @first_name.setter
-    def first_name(self, value):
-        """ Setter pour le prénom (max 50 caractères). """
+    @db.validates('first_name')
+    def validate_first_name(self, key, value):
+        """Prénom obligatoire, max 50 caractères."""
         if not value or len(value) > 50:
-            raise ValueError(
-                "Le prénom est obligatoire (max 50 caractères)."
-            )
-        self.__first_name = value
+            raise ValueError("Le prénom est obligatoire (max 50 caractères).")
+        return value
 
-    @property
-    def last_name(self):
-        """ Getter pour le nom. """
-        return self.__last_name
-
-    @last_name.setter
-    def last_name(self, value):
-        """ Setter pour le nom (max 50 caractères). """
+    @db.validates('last_name')
+    def validate_last_name(self, key, value):
+        """Nom obligatoire, max 50 caractères."""
         if not value or len(value) > 50:
-            raise ValueError(
-                "Le nom est obligatoire (max 50 caractères)."
-            )
-        self.__last_name = value
+            raise ValueError("Le nom est obligatoire (max 50 caractères).")
+        return value
 
-    @property
-    def email(self):
-        """ Getter pour l'e-mail. """
-        return self.__email
-
-    @email.setter
-    def email(self, value):
-        """ Setter pour l'e-mail avec validation Regex. """
-        if not value or not self.__EMAIL_RE.match(value):
+    @db.validates('email')
+    def validate_email(self, key, value):
+        """Email obligatoire, format valide.validation Regex. """
+        if not value or not User._EMAIL_RE.match(value):
             raise ValueError(
                 f"L'adresse e-mail '{value}' est invalide."
             )
-        self.__email = value
+        return value
 
-    @property
-    def is_admin(self):
-        """ Getter pour le statut administrateur. """
-        return self.__is_admin
-
-    @is_admin.setter
-    def is_admin(self, value):
-        """ Setter pour le statut administrateur. """
-        if not isinstance(value, bool):
-            raise ValueError("Le statut is_admin doit être un booléen.")
-        self.__is_admin = value
+    @db.validates('is_admin')
+    def validate_is_admin(self, key, value):
+        """is_admin doit être un booléen."""
+        return bool(value)
 
     def hash_password(self, password):
         """Hache le mot de passe avant de le stocker."""
