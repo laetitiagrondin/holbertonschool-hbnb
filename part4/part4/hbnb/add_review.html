@@ -4,22 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Review</title>
+    <link rel="icon" type="image/png" href="images/icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+    <!-- HEADER -->
+    <header>
+        <a href="index.html" aria-label="HBnB Home">
+            <img src="images/logo.png" alt="HBnB Logo" class="logo"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="logo-text" style="display:none;"><span>H</span>BnB</span>
+        </a>
+        <nav>
+            <a href="index.html">Explore</a>
+            <a href="login.html" class="login-button" id="auth-link">Login</a>
+        </nav>
+    </header>
+
+    <!-- MAIN -->
     <main>
-        <!-- Add something to idfentify the place you're reviewing -->
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Home</a>
+            <span>›</span>
+            <a href="#" id="back-to-place">Place</a>
+            <span>›</span>
+            <span>Add Review</span>
+        </nav>
+
+        <!-- Review form — identifies the place being reviewed -->
         <form id="review-form">
+
             <h2>Add a Review</h2>
+
+            <!-- Place info injected dynamically -->
+            <p class="review-place-info" id="review-place-info"></p>
+
+            <!-- Alert messages -->
+            <div id="review-error" class="alert alert-error" role="alert"></div>
+            <div id="review-success" class="alert alert-success" role="status"></div>
+
             <label for="review">Your Review:</label>
-            <textarea id="review" name="review" required></textarea>
+            <textarea id="review" name="review" required
+                      placeholder="Tell future guests what made your stay special…"></textarea>
+
             <label for="rating">Rating:</label>
             <select id="rating" name="rating" required>
                 <!-- Options for rating -->
+                <option value="" disabled selected>Select a rating</option>
+                <option value="5">⭐⭐⭐⭐⭐ — Excellent (5/5)</option>
+                <option value="4">⭐⭐⭐⭐ — Very Good (4/5)</option>
+                <option value="3">⭐⭐⭐ — Good (3/5)</option>
+                <option value="2">⭐⭐ — Fair (2/5)</option>
+                <option value="1">⭐ — Poor (1/5)</option>
             </select>
+
             <button type="submit">Submit Review</button>
+
         </form>
+
     </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; <strong>HBnB</strong> 2024 &mdash; All rights reserved.</p>
+    </footer>
+
     <script src="scripts.js"></script>
 </body>
 </html>
