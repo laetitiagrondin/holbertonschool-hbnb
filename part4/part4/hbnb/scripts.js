@@ -5,11 +5,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =========================================================
-       HELPERS
-       ========================================================= */
+    /*HELPERS*/
 
-    /** Read a cookie by name. Returns null if not found. */
+    /* Read a cookie by name. Returns null if not found. */
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -17,31 +15,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    /** Set a cookie (expires in `days` days, SameSite=Strict). */
+    /* Set a cookie (expires in `days` days, SameSite=Strict). */
     function setCookie(name, value, days = 1) {
         const expires = new Date(Date.now() + days * 86400000).toUTCString();
         document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Strict`;
     }
 
-    /** Get a URL query param. */
+    /* Get a URL query param. */
     function getParam(name) {
         return new URLSearchParams(window.location.search).get(name);
     }
 
-    /** Escape HTML to avoid XSS when injecting user data. */
+    /* Escape HTML to avoid XSS when injecting user data. */
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = String(str);
         return div.innerHTML;
     }
 
-    /** Show a star string for a numeric rating 1-5. */
+    /* Show a star string for a numeric rating 1-5. */
     function renderStars(rating) {
         const n = Math.round(Number(rating));
         return '★'.repeat(n) + '☆'.repeat(5 - n);
     }
 
-    /** Show/hide an alert element. */
+    /* Show/hide an alert element. */
     function showAlert(id, message) {
         const el = document.getElementById(id);
         if (!el) return;
@@ -54,17 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) el.style.display = 'none';
     }
 
-    /* =========================================================
-       AUTH HELPERS
-       ========================================================= */
+    /*AUTH HELPERS*/
 
     const token = getCookie('token');
 
-    /**
-     * Update the header login link:
-     * - If logged in: show "Logout" and clear cookie on click.
-     * - Otherwise: keep "Login" pointing to login.html.
-     */
+    /*Update the header login link:
+    If logged in: show "Logout" and clear cookie on click.
+    Otherwise: keep "Login" pointing to login.html.*/
     function updateAuthLink() {
         const link = document.getElementById('login-link') || document.getElementById('auth-link');
         if (!link) return;
@@ -84,9 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateAuthLink();
 
-    /* =========================================================
-       TASK 2 — LOGIN PAGE (login.html)
-       ========================================================= */
+    /*LOGIN PAGE (login.html)*/
 
     const loginForm = document.getElementById('login-form');
 
@@ -102,9 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             hideAlert('login-error');
 
-            const email    = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const btn      = loginForm.querySelector('button[type="submit"]');
+            const btn = loginForm.querySelector('button[type="submit"]');
 
             if (!email || !password) {
                 showAlert('login-error', 'Please fill in all fields.');
@@ -115,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled    = true;
 
             try {
-                const response = await fetch('/api/v1/auth/login', {
+                const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body:    JSON.stringify({ email, password })
@@ -123,26 +115,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    /* Store JWT token in a cookie — expires in 1 day */
+                    /* Store JWT token in a cookie - expires in 1 day */
                     setCookie('token', data.access_token, 1);
                     window.location.href = 'index.html';
                 } else {
                     const err = await response.json().catch(() => ({}));
                     showAlert('login-error', err.message || 'Invalid credentials. Please try again.');
                     btn.textContent = 'Login';
-                    btn.disabled    = false;
+                    btn.disabled = false;
                 }
             } catch (err) {
                 showAlert('login-error', 'Connection error. Please try again.');
                 btn.textContent = 'Login';
-                btn.disabled    = false;
+                btn.disabled = false;
             }
         });
     }
 
-    /* =========================================================
-       TASK 3 — INDEX PAGE (index.html)
-       ========================================================= */
+        /*Fetch POST request to login endpoint */
+    async function loginUser(email, password) {
+        const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+        return response;
+    }
+    /*INDEX PAGE (index.html)*/
 
     const placesList  = document.getElementById('places-list');
     const priceFilter = document.getElementById('price-filter');
@@ -163,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             priceFilter.innerHTML = '<option value="all">All prices</option>';
             prices.forEach(price => {
                 const opt = document.createElement('option');
-                opt.value       = price;
+                opt.value = price;
                 opt.textContent = `Up to $${price}`;
                 priceFilter.appendChild(opt);
             });
@@ -185,11 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             places.forEach(place => {
                 const price = place.price_by_night ?? place.price ?? '—';
-                const id    = place.id ?? place._id ?? '';
+                const id = place.id ?? place._id ?? '';
 
                 const article = document.createElement('article');
-                article.className         = 'place-card';
-                article.dataset.price     = price;
+                article.className = 'place-card';
+                article.dataset.price = price;
                 article.innerHTML = `
                     <div class="place-card-thumb">
                         <img src="images/logo.png" alt="${escapeHtml(place.name)}">
@@ -240,13 +241,11 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchPlaces();
     }
 
-    /* =========================================================
-       TASK 4 — PLACE DETAILS PAGE (place.html)
-       ========================================================= */
+    /*PLACE DETAILS PAGE (place.html)*/
 
     const placeDetailsSection = document.getElementById('place-details');
-    const reviewsSection      = document.getElementById('reviews');
-    const addReviewSection    = document.getElementById('add-review');
+    const reviewsSection = document.getElementById('reviews');
+    const addReviewSection = document.getElementById('add-review');
 
     if (placeDetailsSection) {
 
@@ -287,10 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const breadcrumb = document.getElementById('breadcrumb-name');
             if (breadcrumb) breadcrumb.textContent = place.name;
 
-            const price       = place.price_by_night ?? place.price ?? '—';
-            const host        = place.host_name ?? place.host ?? '—';
+            const price = place.price_by_night ?? place.price ?? '—';
+            const host = place.host_name ?? place.host ?? '—';
             const description = place.description ?? '';
-            const amenities   = place.amenities ?? [];
+            const amenities  = place.amenities ?? [];
 
             placeDetailsSection.innerHTML = `
                 <div class="place-details">
@@ -452,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const reviewText = document.getElementById('review').value.trim();
             const rating = document.getElementById('rating').value;
-            const btn  = reviewForm.querySelector('button[type="submit"]');
+            const btn = reviewForm.querySelector('button[type="submit"]');
 
             if (!reviewText) {
                 showAlert('review-error', 'Please write a review before submitting.');
@@ -482,8 +481,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok || response.status === 201) {
                     showAlert('review-success', '✅ Your review has been submitted! Redirecting…');
-                    reviewForm.style.opacity        = '0.5';
-                    reviewForm.style.pointerEvents  = 'none';
+                    reviewForm.style.opacity = '0.5';
+                    reviewForm.style.pointerEvents = 'none';
                     setTimeout(() => {
                         window.location.href = placeId ? `place.html?id=${placeId}` : 'index.html';
                     }, 2000);
@@ -491,12 +490,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const err = await response.json().catch(() => ({}));
                     showAlert('review-error', err.message || 'Could not submit your review. Please try again.');
                     btn.textContent = 'Submit Review';
-                    btn.disabled    = false;
+                    btn.disabled = false;
                 }
             } catch (err) {
                 showAlert('review-error', 'Connection error. Please check your network and try again.');
                 btn.textContent = 'Submit Review';
-                btn.disabled    = false;
+                btn.disabled = false;
             }
         });
     }

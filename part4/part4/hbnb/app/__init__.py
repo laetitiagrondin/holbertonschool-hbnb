@@ -4,6 +4,7 @@ Configure Flask et Flask-RESTX.
 """
 from flask import Flask
 from flask_restx import Api
+from flask_cors import CORS
 from app.extensions import bcrypt, jwt, db
 from app.api.v1.auth import api as auth_ns
 from app.api.v1.users import api as users_ns
@@ -25,6 +26,15 @@ def create_app(config_class="config.DevelopmentConfig"):
     """
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    # Autorise les requêtes cross-origin depuis le client web
+    CORS(app, origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:8080",
+        "http://localhost:8080"
+    ])
+    
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API', doc='/api/v1/')
     # Initialisation des extensions
     bcrypt.init_app(app)
