@@ -116,21 +116,6 @@ class User(BaseModel):
     def update(self, data: dict):
         """
         Met à jour les attributs modifiables de l'utilisateur.
-
-        Seuls les champs ``first_name``, ``last_name``, ``email`` et
-        ``is_admin`` peuvent être modifiés.  La validation est relancée
-        après chaque mise à jour pour garantir la cohérence des données.
-
-        Paramètres
-        ----------
-        data : dict
-            Dictionnaire des champs à modifier et de leurs nouvelles valeurs.
-            Les clés inconnues sont silencieusement ignorées.
-
-        Lève
-        ----
-        ValueError
-            Si les nouvelles valeurs ne respectent pas les contraintes.
         """
         # Liste blanche des champs autorisés à être modifiés
         champs_autorises = {"first_name", "last_name", "email", "is_admin"}
@@ -149,14 +134,6 @@ class User(BaseModel):
     def to_dict(self) -> dict:
         """
         Sérialise l'utilisateur sous forme de dictionnaire JSON-compatible.
-
-        Étend le dictionnaire de base (``BaseModel.to_dict()``) avec les
-        attributs spécifiques à l'utilisateur.
-
-        Retour
-        ------
-        dict
-            Dictionnaire contenant tous les champs publics de l'utilisateur.
         """
         # Récupère le dictionnaire de base (id, created_at, updated_at)
         base = super().to_dict()

@@ -29,10 +29,10 @@ def create_app(config_class="config.DevelopmentConfig"):
     
     # Autorise les requêtes cross-origin depuis le client web
     CORS(app, origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
         "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:8080",
-        "http://localhost:8080"
+        "http://localhost:5500"
     ])
     
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API', doc='/api/v1/')
