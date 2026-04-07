@@ -3,7 +3,7 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* --- 1. FONCTIONS OUTILS (HELPERS) --- */
+    /* FONCTIONS OUTILS (HELPERS)*/
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const token = getCookie('token');
 
-    /* --- 2. LOGIQUE POUR LE FILTRAGE (NOUVEAU) --- */
+    /*LOGIQUE POUR LE FILTRAGE*/
 
     // Remplit le menu déroulant avec les options demandées
     function populatePriceFilter() {
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* --- 3. LOGIQUE POUR LA PAGE D'ACCUEIL (INDEX.HTML) --- */
+    /* LOGIQUE POUR LA PAGE D'ACCUEIL (INDEX.HTML)*/
 
     async function fetchPlaces(token) {
         const container = document.getElementById('places-list');
@@ -123,8 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* --- 4. LOGIQUE POUR LA PAGE DÉTAILS (PLACE.HTML) --- */
-    // (Tes fonctions fetchPlaceDetails et displayPlaceDetails restent identiques...)
+    /*LOGIQUE POUR LA PAGE DÉTAILS (PLACE.HTML)*/
     async function fetchPlaceDetails(token, placeId) {
         const container = document.getElementById('place-details');
         try {
@@ -194,9 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* --- 5. INITIALISATION ET ROUTAGE --- */
-
-    /* --- 5. INITIALISATION ET ROUTAGE --- */
+    /* INITIALISATION ET ROUTAGE*/
 
     function initialize() {
         const token = getCookie('token');
@@ -205,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('login-form');
         const placeId = getPlaceIdFromURL();
 
-        // A. Gestion du bouton Login/Logout (Header)
+        // Gestion du bouton Login/Logout (Header)
         if (authLink) {
             if (token) {
                 authLink.textContent = "Logout";
@@ -224,14 +221,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // B. Si on est sur la page d'accueil (index.html)
+        // Si on est sur la page d'accueil (index.html)
         if (placesListElement) {
             populatePriceFilter();
             setupPriceFilter();
             fetchPlaces(token);
         }
 
-        // C. Si on est sur la page de Login (login.html)
+        // Si on est sur la page de Login (login.html)
         if (loginForm) {
             loginForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -260,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // D. Si on est sur la page de détails (place.html)
+        // Si on est sur la page de détails (place.html)
         if (placeId && document.getElementById('place-details')) {
             fetchPlaceDetails(token, placeId);
             const addReviewSection = document.getElementById('add-review');
@@ -272,6 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // On lance enfin toute la logique
+
     initialize();
 });
