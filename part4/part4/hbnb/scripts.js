@@ -1,10 +1,15 @@
 /**
- * Attente du chargement complet du DOM avant d'exécuter le script
+ * Attente du chargement complet du DOM avant d'exécuter le script.
+ * Cela garantit que tous les éléments HTML sont accessibles.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* FONCTIONS OUTILS (HELPERS)*/
+    /* --- 1. FONCTIONS OUTILS (HELPERS) --- */
 
+    /**
+     * Récupère la valeur d'un cookie par son nom.
+     * Utile pour extraire le jeton JWT stocké lors du login.
+     */
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -12,6 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
+    /**
+     * Sécurise les chaînes de caractères pour éviter les failles XSS.
+     * Remplace les caractères spéciaux par leurs entités HTML.
+     */
     function escapeHtml(str) {
         if (!str) return "";
         const div = document.createElement('div');
@@ -19,16 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return div.innerHTML;
     }
 
+    /**
+     * Extrait l'identifiant (ID) du lieu depuis les paramètres de l'URL (?id=...).
+     */
     function getPlaceIdFromURL() {
         const params = new URLSearchParams(window.location.search);
         return params.get('id');
     }
 
-    const token = getCookie('token');
+    /* --- 2. LOGIQUE POUR LE FILTRAGE --- */
 
-    /*LOGIQUE POUR LE FILTRAGE*/
-
-    // Remplit le menu déroulant avec les options demandées
+    /**
+     * Remplit dynamiquement le menu déroulant du filtre de prix sur l'index.
+     */
     function populatePriceFilter() {
         const filter = document.getElementById('price-filter');
         if (!filter) return;
@@ -45,7 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ).join('');
     }
 
-    // Gère l'affichage des cartes en fonction du prix sélectionné
+    /**
+     * Écoute les changements sur le filtre de prix et masque/affiche les cartes.
+     */
     function setupPriceFilter() {
         const priceFilter = document.getElementById('price-filter');
         if (!priceFilter) return;
@@ -56,20 +70,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cards.forEach(card => {
                 const cardPrice = parseFloat(card.getAttribute('data-price'));
-
                 if (selectedValue === 'all') {
                     card.style.display = 'block';
                 } else {
                     const maxPrice = parseFloat(selectedValue);
-                    // Affiche si le prix est inférieur ou égal au filtre choisi
+                    // Logique : afficher si le prix de la carte <= prix maximum choisi
                     card.style.display = cardPrice <= maxPrice ? 'block' : 'none';
                 }
             });
         });
     }
 
-    /* LOGIQUE POUR LA PAGE D'ACCUEIL (INDEX.HTML)*/
+    /* --- 3. LOGIQUE API (FETCH & DISPLAY) --- */
 
+    /**
+     * Récupère la liste de tous les lieux via l'API.
+     */
     async function fetchPlaces(token) {
         const container = document.getElementById('places-list');
         try {
@@ -84,33 +100,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const places = await response.json();
                 displayPlaces(places);
-            } else {
-                if (container) container.innerHTML = `<p>Erreur serveur (${response.status}).</p>`;
             }
         } catch (error) {
             if (container) container.innerHTML = "<p>Impossible de contacter le serveur.</p>";
         }
     }
 
+    /**
+     * Génère le HTML pour chaque lieu et l'injecte dans la liste.
+     */
     function displayPlaces(places) {
         const container = document.getElementById('places-list');
         if (!container) return;
-
         container.innerHTML = ''; 
-        if (places.length === 0) {
-            container.innerHTML = '<p class="no-places">No places available at the moment.</p>';
-            return;
-        }
-
+        
         places.forEach(place => {
             const title = place.title || place.name || "Untitled Place";
             const price = place.price_by_night ?? place.price ?? 0;
-            
             const article = document.createElement('article');
             article.className = 'place-card';
-            // IMPORTANT : On stocke le prix pour que le filtre puisse le lire
+            // On stocke le prix en attribut de données pour le filtrage JS
             article.setAttribute('data-price', price);
-
             article.innerHTML = `
                 <div class="place-info">
                     <h3>${escapeHtml(title)}</h3>
@@ -123,9 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /*LOGIQUE POUR LA PAGE DÉTAILS (PLACE.HTML)*/
+    /**
+     * Récupère les détails spécifiques d'un lieu (incluant les avis et équipements).
+     */
     async function fetchPlaceDetails(token, placeId) {
-        const container = document.getElementById('place-details');
         try {
             const response = await fetch(`http://127.0.0.1:5000/api/v1/places/${placeId}`, {
                 method: 'GET',
@@ -134,141 +145,168 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json'
                 }
             });
-
             if (response.ok) {
                 const place = await response.json();
                 displayPlaceDetails(place);
-            } else if (container) {
-                container.innerHTML = "<p>Lieu introuvable.</p>";
             }
         } catch (error) {
             console.error("Erreur API Details:", error);
         }
     }
 
+    /**
+     * Affiche les informations détaillées, les équipements et les avis d'un lieu.
+     */
     function displayPlaceDetails(place) {
         const detailsContainer = document.getElementById('place-details');
         const reviewsContainer = document.getElementById('reviews');
         const breadcrumbName = document.getElementById('breadcrumb-name');
 
-        if (!detailsContainer) return;
+        // Mise à jour du fil d'Ariane
+        if (breadcrumbName) breadcrumbName.textContent = place.title || place.name;
 
-        const title = place.title || place.name || "Détails du lieu";
-        const price = place.price_by_night ?? place.price ?? 0;
-
-        if (breadcrumbName) breadcrumbName.textContent = title;
-
-        detailsContainer.innerHTML = `
-            <div class="place-header">
-                <h1>${escapeHtml(title)}</h1>
-                <p class="price-tag"><strong>$${price}</strong> per night</p>
-            </div>
-            <div class="place-content">
-                <p class="description">${escapeHtml(place.description)}</p>
-                <div class="amenities-section">
+        // Injection des informations principales
+        if (detailsContainer) {
+            const price = place.price_by_night ?? place.price ?? 0;
+            detailsContainer.innerHTML = `
+                <div class="place-header">
+                    <h1>${escapeHtml(place.title || place.name)}</h1>
+                    <p class="price-tag"><strong>$${price}</strong> per night</p>
+                </div>
+                <div class="place-content">
+                    <p class="description">${escapeHtml(place.description)}</p>
                     <h3>Amenities</h3>
                     <ul class="amenities-list">
-                        ${place.amenities && place.amenities.length > 0 
-                            ? place.amenities.map(a => `<li>${escapeHtml(a.name)}</li>`).join('') 
-                            : '<li>No amenities available</li>'}
+                        ${place.amenities?.map(a => `<li>${escapeHtml(a.name)}</li>`).join('') || '<li>None</li>'}
                     </ul>
-                </div>
-            </div>
-        `;
-
-        if (reviewsContainer) {
-            reviewsContainer.innerHTML = `
-                <h2>Reviews</h2>
-                <div class="reviews-list">
-                    ${place.reviews && place.reviews.length > 0
-                        ? place.reviews.map(r => `
-                            <div class="review-card">
-                                <p class="review-text">"${escapeHtml(r.text)}"</p>
-                                <p class="review-author"><strong>— ${escapeHtml(r.user_name || "Guest")}</strong></p>
-                            </div>
-                        `).join('')
-                        : '<p>No reviews yet for this place.</p>'}
                 </div>
             `;
         }
+
+        // Injection de la liste des avis
+        if (reviewsContainer) {
+            reviewsContainer.innerHTML = `<h2>Reviews</h2>` + 
+                (place.reviews?.length > 0 
+                ? place.reviews.map(r => `
+                    <div class="review-card">
+                        <p>"${escapeHtml(r.text)}"</p>
+                        <p><strong>— ${escapeHtml(r.user_name || "Guest")}</strong></p>
+                    </div>`).join('')
+                : '<p>No reviews yet.</p>');
+        }
     }
 
-    /* INITIALISATION ET ROUTAGE*/
+    /* --- 4. INITIALISATION ET ROUTAGE --- */
 
+    /**
+     * Fonction principale qui orchestre le comportement du site selon la page chargée.
+     */
     function initialize() {
         const token = getCookie('token');
-        const authLink = document.getElementById('login-link');
-        const placesListElement = document.getElementById('places-list');
-        const loginForm = document.getElementById('login-form');
         const placeId = getPlaceIdFromURL();
+        const authLink = document.getElementById('login-link');
 
-        // Gestion du bouton Login/Logout (Header)
+        // A. Gestion dynamique du Header (Bouton Login/Logout)
         if (authLink) {
             if (token) {
                 authLink.textContent = "Logout";
-                authLink.href = "#";
-                authLink.onclick = function(e) {
+                authLink.onclick = (e) => {
                     e.preventDefault();
-                    // On efface le cookie
+                    // Suppression du cookie en le faisant expirer immédiatement
                     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-                    // On force le retour à l'accueil
                     window.location.href = "index.html";
                 };
             } else {
                 authLink.textContent = "Login";
                 authLink.href = "login.html";
-                authLink.onclick = null;
             }
         }
 
-        // Si on est sur la page d'accueil (index.html)
-        if (placesListElement) {
+        // B. Configuration de la page d'accueil (index.html)
+        if (document.getElementById('places-list')) {
             populatePriceFilter();
             setupPriceFilter();
             fetchPlaces(token);
         }
 
-        // Si on est sur la page de Login (login.html)
+        // C. Gestion du formulaire de connexion (login.html)
+        const loginForm = document.getElementById('login-form');
         if (loginForm) {
-            loginForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                const errorMsg = document.getElementById('login-error');
+                
+                const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
 
-                try {
-                    const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password })
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Strict`;
-                        window.location.href = 'index.html'; 
-                    } else if (errorMsg) {
-                        errorMsg.textContent = "Login failed: Invalid email or password.";
-                        errorMsg.style.display = 'block';
-                    }
-                } catch (error) { 
-                    console.error("Erreur login:", error); 
+                if (response.ok) {
+                    const data = await response.json();
+                    // Stockage du token dans un cookie sécurisé pour 24h
+                    document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Strict`;
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Invalid credentials");
                 }
             });
         }
 
-        // Si on est sur la page de détails (place.html)
+        // D. Configuration de la page de détails (place.html)
         if (placeId && document.getElementById('place-details')) {
             fetchPlaceDetails(token, placeId);
             const addReviewSection = document.getElementById('add-review');
             if (addReviewSection) {
+                // N'affiche le bouton "Add Review" que si l'utilisateur est connecté
                 addReviewSection.innerHTML = token 
                     ? `<a href="add_review.html?id=${placeId}" class="add-review-button">Add a Review</a>`
                     : `<p><a href="login.html">Login</a> to add a review.</p>`;
             }
         }
+
+        // E. Gestion de la page de création d'avis (add_review.html)
+        const reviewForm = document.getElementById('review-form');
+        if (reviewForm) {
+            // Sécurité : redirection si accès direct sans être connecté
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Lien de retour dynamique vers le lieu consulté
+            const backLink = document.getElementById('back-to-place');
+            if (backLink) backLink.href = `place.html?id=${placeId}`;
+
+            reviewForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const text = document.getElementById('review').value;
+                const rating = document.getElementById('rating').value;
+
+                const response = await fetch('http://127.0.0.1:5000/api/v1/reviews/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Envoi obligatoire du JWT
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        place_id: placeId,
+                        text: text,
+                        rating: parseInt(rating)
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Review submitted!');
+                    window.location.href = `place.html?id=${placeId}`;
+                } else {
+                    alert('Failed to submit review.');
+                }
+            });
+        }
     }
 
-
+    // Lancement de la logique applicative
     initialize();
 });
