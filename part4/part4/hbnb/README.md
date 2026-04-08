@@ -170,11 +170,11 @@ Toutes les pages HTML et le fichier de style CSS ont été validés avec succès
 
 | Fichier / Page | Statut | Rapport de Validation (PDF) |
 |:--- |:---:|:--- |
-| `index.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/index_w3c.pdf) |
-| `login.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/login_w3c.pdf) |
-| `place.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/place_w3c.pdf) |
-| `add_review.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/addreview_w3c.pdf) |
-| `styles.css` | ✅ Valide | [Consulter le rapport](./w3c_reports/css_w3c.pdf) |
+| `index.html` | ✅ Valide | [Consulter le rapport](./part4/part4/hbnb/w3c_reports/index_w3c.pdf) |
+| `login.html` | ✅ Valide | [Consulter le rapport](./part4/part4/hbnb/w3c_reports/login_w3c.pdf) |
+| `place.html` | ✅ Valide | [Consulter le rapport](./part4/part4/hbnb/w3c_reports/place_w3c.pdf) |
+| `add_review.html` | ✅ Valide | [Consulter le rapport](./part4/part4/hbnb/w3c_reports/addreview_w3c.pdf.pdf) |
+| `styles.css` | ✅ Valide | [Consulter le rapport](./part4/part4/hbnb/w3c_reports/css_w3c.pdf) |
 
 > **Note :** La conformité a été vérifiée via le [Nu Html Checker](https://validator.w3.org/nu/) et le validateur CSS du W3C.
 
