@@ -4,7 +4,7 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    /*  FONCTIONS OUTILS (HELPERS)  */
+    /*  FONCTIONS OUTILS (HELPERS) --- */
 
     /**
      * Récupère la valeur d'un cookie par son nom.
@@ -253,13 +253,13 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function submitReview(token, placeId, reviewText, rating) {
         const response = await fetch(
-            `http://127.0.0.1:5000/api/v1/places/${placeId}/reviews`, {
+            `http://127.0.0.1:5000/api/v1/reviews/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ text: reviewText, rating: parseInt(rating) })
+            body: JSON.stringify({ text: reviewText, rating: parseInt(rating), place_id: placeId })
         });
         return response;
     }
@@ -304,11 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         /* Page d'accueil (index.html) */
         if (document.getElementById('places-list')) {
-            /* Redirection si non connecté */
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+
             populatePriceFilter();
             setupPriceFilter();
             fetchPlaces(token);
