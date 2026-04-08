@@ -665,7 +665,7 @@ form button[type="submit"]:hover,
     border: 1px solid var(--border);
 }
 
-#review-form h2 {
+#review-form h1 {
     font-family: 'Lora', serif;
     font-size: 1.9rem;
     font-weight: 700;
