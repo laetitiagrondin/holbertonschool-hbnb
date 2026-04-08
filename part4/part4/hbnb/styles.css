@@ -135,10 +135,14 @@ footer strong {
 /* Contenu principal centré */
 main {
     padding: 2rem;
-    flex: 1;
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centre verticalement */
+    align-items: center;     /* Centre horizontalement */
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    width: 100%;
 }
 
 /* Bannière d'accueil (index.html) */
@@ -619,7 +623,8 @@ form button[type="submit"]:hover,
 /* Formulaire de connexion (login.html) */
 #login-form {
     max-width: 440px;
-    margin: 60px auto 0;
+    width: 100%;
+    margin: 0;
     background: var(--bg-card);
     border-radius: 16px;
     padding: 44px;
@@ -627,7 +632,7 @@ form button[type="submit"]:hover,
     border: 1px solid var(--border);
 }
 
-#login-form h2 {
+#login-form h1 {
     font-family: 'Lora', serif;
     font-size: 1.9rem;
     font-weight: 700;
