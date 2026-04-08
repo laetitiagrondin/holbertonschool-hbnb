@@ -163,5 +163,20 @@ POST	/api/v1/auth/login	Connexion et récupération du JWT	Non
 GET	/api/v1/places/	Liste tous les lieux	Non
 POST	/api/v1/reviews/	Ajouter un avis sur un lieu	Oui (JWT)
 PUT	/api/v1/users/me	Modifier son profil	Oui (JWT)
+
+## W3C Validation
+
+Toutes les pages HTML et le fichier de style CSS ont été validés avec succès (0 erreur, 0 avertissement). Vous pouvez consulter les rapports officiels ci-dessous :
+
+| Fichier / Page | Statut | Rapport de Validation (PDF) |
+|:--- |:---:|:--- |
+| `index.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/index_w3c.pdf) |
+| `login.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/login_w3c.pdf) |
+| `place.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/place_w3c.pdf) |
+| `add_review.html` | ✅ Valide | [Consulter le rapport](./w3c_reports/addreview_w3c.pdf) |
+| `styles.css` | ✅ Valide | [Consulter le rapport](./w3c_reports/css_w3c.pdf) |
+
+> **Note :** La conformité a été vérifiée via le [Nu Html Checker](https://validator.w3.org/nu/) et le validateur CSS du W3C.
+
 👥 Auteur
 Luidgi — Développement Backend & Intégration Frontend
