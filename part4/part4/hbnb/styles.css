@@ -1,11 +1,8 @@
-/* 
-  This is a SAMPLE File to get you started. Follow the instructions on the project to complete the tasks. 
-  You'll probably need to override some of theese styles.
-*/
+/* Fichier de styles principal — HBnB */
 
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 
-/*VARIABLES*/
+/* Variables globales */
 :root {
     --primary:       #E8603C;
     --primary-dark:  #C94A28;
@@ -21,7 +18,7 @@
     --transition:    0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/*RESET*/
+/* Réinitialisation des styles par défaut */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -48,7 +45,7 @@ img {
     display: block;
 }
 
-/*HEADER*/
+/* En-tête fixe en haut de page */
 header {
     background-color: var(--accent);
     color: #fff;
@@ -63,14 +60,14 @@ header {
     box-shadow: 0 2px 12px rgba(0,0,0,0.18);
 }
 
-/* Logo image — class="logo" as required */
+/* Logo de l'application */
 .logo {
     height: 40px;
     width: auto;
     object-fit: contain;
 }
 
-/* Fallback text logo when no image */
+/* Logo texte de secours si l'image est absente */
 .logo-text {
     font-family: 'Lora', serif;
     font-size: 1.45rem;
@@ -82,6 +79,7 @@ header {
     color: var(--primary);
 }
 
+/* Barre de navigation */
 nav {
     display: flex;
     align-items: center;
@@ -104,7 +102,7 @@ nav a:hover {
     background: rgba(255,255,255,0.1);
 }
 
-/* Login button — class="login-button"*/
+/* Bouton de connexion dans le header */
 .login-button {
     color: #fff !important;
     background: var(--primary) !important;
@@ -120,7 +118,7 @@ nav a:hover {
     box-shadow: 0 4px 14px rgba(232,96,60,0.40) !important;
 }
 
-/*FOOTER*/
+/* Pied de page */
 footer {
     background-color: var(--accent);
     color: rgba(255,255,255,0.6);
@@ -134,7 +132,7 @@ footer strong {
     color: #fff;
 }
 
-/*MAIN*/
+/* Contenu principal centré */
 main {
     padding: 2rem;
     flex: 1;
@@ -143,7 +141,7 @@ main {
     width: 100%;
 }
 
-/*HERO BANNER (index.html)*/
+/* Bannière d'accueil (index.html) */
 .hero {
     background: linear-gradient(135deg, var(--accent) 0%, #3D5A7A 100%);
     border-radius: 16px;
@@ -181,7 +179,7 @@ main {
     position: relative;
 }
 
-/*FILTER SECTION (index.html — #filter)*/
+/* Section de filtrage par prix (index.html) */
 #filter {
     display: flex;
     align-items: center;
@@ -218,7 +216,7 @@ main {
     box-shadow: 0 0 0 3px rgba(232,96,60,0.15);
 }
 
-/*PLACES LIST GRID (index.html — #places-list)*/
+/* Grille des lieux (index.html) */
 #places-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
@@ -237,7 +235,7 @@ main {
     color: var(--primary);
 }
 
-/*PLACE CARD — class="place-card"*/
+/* Carte d'un lieu — paramètres fixes imposés par le sujet */
 .place-card {
     background: var(--bg-card);
     border: 1px solid #ddd;
@@ -255,6 +253,7 @@ main {
     box-shadow: var(--shadow-md);
 }
 
+/* Vignette image de la carte */
 .place-card-thumb {
     width: 100%;
     height: 170px;
@@ -300,7 +299,7 @@ main {
     margin-top: auto;
 }
 
-/* Details button — class="details-button" as required */
+/* Bouton "Voir les détails" sur chaque carte */
 .details-button {
     display: block;
     width: 100%;
@@ -324,8 +323,7 @@ main {
     transform: translateY(-1px);
 }
 
-/*PLACE DETAILS PAGE (place.html)
-class="place-details" and class="place-info"*/
+/* Page de détails d'un lieu (place.html) */
 .place-details {
     background: var(--bg-card);
     border-radius: 14px;
@@ -350,6 +348,7 @@ class="place-details" and class="place-info"*/
     color: var(--text);
 }
 
+/* Badge affichant le prix par nuit */
 .price-badge {
     background: var(--primary);
     color: #fff;
@@ -366,6 +365,7 @@ class="place-details" and class="place-info"*/
     opacity: 0.85;
 }
 
+/* Image principale du lieu */
 .place-banner {
     width: 100%;
     height: 320px;
@@ -386,7 +386,7 @@ class="place-details" and class="place-info"*/
     border-radius: 10px;
 }
 
-/* class="place-info" as required */
+/* Grille d'informations du lieu (hôte, prix, chambres…) */
 .place-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -403,6 +403,9 @@ class="place-details" and class="place-info"*/
     letter-spacing: 0.07em;
     color: #999;
     margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .info-item .info-value {
@@ -418,6 +421,7 @@ class="place-details" and class="place-info"*/
     margin-bottom: 24px;
 }
 
+/* Liste des équipements */
 .amenities-title {
     font-size: 0.75rem;
     font-weight: 700;
@@ -441,9 +445,12 @@ class="place-details" and class="place-info"*/
     font-size: 0.84rem;
     font-weight: 600;
     color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/*REVIEWS SECTION (place.html — #reviews)*/
+/* Section des avis (place.html) */
 #reviews h2 {
     font-family: 'Lora', serif;
     font-size: 1.5rem;
@@ -452,7 +459,7 @@ class="place-details" and class="place-info"*/
     color: var(--text);
 }
 
-/* Review card — class="review-card"*/
+/* Carte d'un avis — paramètres fixes imposés par le sujet */
 .review-card {
     background: var(--bg-card);
     border: 1px solid #ddd;
@@ -480,6 +487,7 @@ class="place-details" and class="place-info"*/
     color: var(--text);
 }
 
+/* Étoiles de notation */
 .review-rating {
     color: var(--primary);
     font-size: 1rem;
@@ -492,8 +500,7 @@ class="place-details" and class="place-info"*/
     line-height: 1.7;
 }
 
-/*ADD REVIEW section (place.html — #add-review)
-class="add-review" and class="form"*/
+/* Section d'ajout d'avis sur place.html */
 #add-review {
     margin-bottom: 36px;
 }
@@ -514,7 +521,7 @@ class="add-review" and class="form"*/
     max-width: 680px;
 }
 
-/* Button to navigate to add_review.html */
+/* Bouton de navigation vers add_review.html */
 .add-review-btn {
     display: inline-flex;
     align-items: center;
@@ -539,7 +546,7 @@ class="add-review" and class="form"*/
     color: #fff;
 }
 
-/*FORM STYLES (shared — class="form")*/
+/* Styles partagés pour tous les formulaires */
 .form label,
 form label {
     display: block;
@@ -585,6 +592,7 @@ form textarea,
     min-height: 110px;
 }
 
+/* Bouton de soumission des formulaires */
 form button[type="submit"],
 .form-submit {
     display: block;
@@ -608,7 +616,7 @@ form button[type="submit"]:hover,
     box-shadow: 0 6px 16px rgba(232,96,60,0.35);
 }
 
-/*LOGIN PAGE*/
+/* Formulaire de connexion (login.html) */
 #login-form {
     max-width: 440px;
     margin: 60px auto 0;
@@ -641,7 +649,7 @@ form button[type="submit"]:hover,
     margin-bottom: 28px;
 }
 
-/*ADD REVIEW PAGE (standalone add_review.html)*/
+/* Formulaire d'ajout d'avis (add_review.html) */
 #review-form {
     max-width: 640px;
     margin: 40px auto 0;
@@ -660,6 +668,7 @@ form button[type="submit"]:hover,
     color: var(--text);
 }
 
+/* Nom du lieu affiché dans le formulaire d'avis */
 .review-place-info {
     font-size: 0.9rem;
     color: var(--text-muted);
@@ -668,7 +677,7 @@ form button[type="submit"]:hover,
     border-bottom: 1px solid var(--border);
 }
 
-/*ALERT MESSAGES*/
+/* Messages d'alerte (erreur / succès) */
 .alert {
     border-radius: 8px;
     padding: 12px 16px;
@@ -688,7 +697,7 @@ form button[type="submit"]:hover,
     color: #065F46;
 }
 
-/*BREADCRUMB*/
+/* Fil d'Ariane (breadcrumb) */
 .breadcrumb {
     display: flex;
     align-items: center;
@@ -707,7 +716,7 @@ form button[type="submit"]:hover,
     text-decoration: underline;
 }
 
-/*EMPTY STATE*/
+/* État vide (aucun résultat) */
 .empty-state {
     text-align: center;
     padding: 48px 20px;
@@ -726,48 +735,7 @@ form button[type="submit"]:hover,
     color: var(--text);
 }
 
-/*RESPONSIVE */
-@media (max-width: 768px) {
-    header {
-        padding: 0 1rem;
-    }
-
-    main {
-        padding: 1.5rem 1rem;
-    }
-
-    .hero {
-        padding: 36px 24px;
-    }
-
-    .place-details {
-        padding: 22px 16px;
-    }
-
-    .add-review {
-        padding: 22px 16px;
-    }
-
-    #login-form,
-    #review-form {
-        padding: 28px 20px;
-        margin-top: 28px;
-    }
-
-    #places-list {
-        grid-template-columns: 1fr;
-    }
-
-    .place-card {
-        margin: 0 0 20px 0;
-    }
-
-    .review-card {
-        margin: 0 0 16px 0;
-    }
-}
-
-/* AMENITY ICONS (icon_bed, icon_bath, icon_wifi) */
+/* Icônes des équipements (lit, bain, wifi) */
 .amenity-icon {
     width: 18px;
     height: 18px;
@@ -777,7 +745,7 @@ form button[type="submit"]:hover,
     margin-right: 4px;
 }
 
-/* Icons row on place cards */
+/* Ligne d'icônes sur les cartes de lieux */
 .place-card-icons {
     display: flex;
     gap: 14px;
@@ -793,23 +761,7 @@ form button[type="submit"]:hover,
     gap: 4px;
 }
 
-/* Place card thumbnail with real image */
-.place-card-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 7px;
-}
-
-/* Place banner with real image */
-.place-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-/* Info label with icon */
+/* Icône dans les labels d'information du lieu */
 .info-label img.amenity-icon {
     width: 16px;
     height: 16px;
@@ -817,21 +769,15 @@ form button[type="submit"]:hover,
     vertical-align: middle;
 }
 
-/* Style du bouton d'ajout d'avis */
-.add-review-button {
-    display: inline-block;      /* Permet de donner une taille au bouton */
-    background-color: #E8603C;  /* La couleur rouge HBnB */
-    color: white !important;    /* Texte en blanc */
-    padding: 10px 20px;         /* Espacement intérieur (taille du bouton) */
-    border-radius: 4px;         /* Coins légèrement arrondis */
-    text-decoration: none;      /* Enlève le souligné du lien */
-    font-weight: bold;          /* Texte en gras */
-    margin-top: 20px;           /* Espace avec le texte au-dessus */
-    transition: 0.3s;           /* Animation fluide au survol */
-}
-
-/* Changement de couleur quand on passe la souris dessus */
-.add-review-button:hover {
-    background-color: #E8603C;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+/* Adaptation mobile */
+@media (max-width: 768px) {
+    header { padding: 0 1rem; }
+    main { padding: 1.5rem 1rem; }
+    .hero { padding: 36px 24px; }
+    .place-details { padding: 22px 16px; }
+    .add-review { padding: 22px 16px; }
+    #login-form, #review-form { padding: 28px 20px; margin-top: 28px; }
+    #places-list { grid-template-columns: 1fr; }
+    .place-card { margin: 0 0 20px 0; }
+    .review-card { margin: 0 0 16px 0; }
 }
