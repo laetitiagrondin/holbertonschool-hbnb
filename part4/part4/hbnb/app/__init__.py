@@ -89,35 +89,44 @@ def seed_data(facade_instance):
             })
             print(" Utilisateur Test créé.")
 
-        # 2. Création des ÉQUIPEMENTS
-        # On crée les objets pour les lier ensuite
-        wifi = facade_instance.create_amenity({"name": "WiFi"})
-        clim = facade_instance.create_amenity({"name": "Climatisation"})
+        # 2. Création des ÉQUIPEMENTS (Version sécurisée)
+        existing_amenities = facade_instance.get_all_amenities()
+        
+        def get_or_create_amenity(name):
+            amenity = next((a for a in existing_amenities if a.name == name), None)
+            if not amenity:
+                amenity = facade_instance.create_amenity({"name": name})
+                print(f" Équipement {name} créé.")
+            return amenity
 
-        # 3. Création de la PLACE (Appartement de l'Admin)
+        wifi = get_or_create_amenity("WiFi")
+        clim = get_or_create_amenity("Climatisation")
+
+        # 3. Création de la PLACE
         existing_places = facade_instance.get_all_places()
-        place = None
-        if not existing_places:
+        place = next((p for p in existing_places if p.title == "Appartement de luxe"), None)
+        
+        if not place:
             place = facade_instance.create_place({
                 "title": "Appartement de luxe",
                 "description": "Superbe vue sur la tour Eiffel. Très calme et lumineux.",
                 "price": 200.0,
                 "latitude": 48.8584,
                 "longitude": 2.2945,
+                "number_rooms": 3,
+                "number_bathrooms": 2,
                 "owner_id": admin.id
             })
             
-            # Tentative sécurisée d'ajout d'équipements
+            # Liaison des équipements (seulement à la création)
             try:
-                if hasattr(facade_instance, 'add_amenity_to_place'):
+                if wifi and hasattr(facade_instance, 'add_amenity_to_place'):
                     facade_instance.add_amenity_to_place(place.id, wifi.id)
+                if clim and hasattr(facade_instance, 'add_amenity_to_place'):
                     facade_instance.add_amenity_to_place(place.id, clim.id)
-            except Exception:
-                print(" Note : Liaison équipements ignorée")
-            
-            print(" Place créée.")
-        else:
-            place = existing_places[0]
+                print(" Place créée avec équipements.")
+            except Exception as e:
+                print(f" Note : Erreur liaison équipements : {e}")
 
         # 4. CRÉATION DE LA REVIEW (Avis de Jean Test sur la place de l'Admin)
         # On vérifie si la place a déjà des reviews pour ne pas doubler

@@ -168,6 +168,11 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Injection des informations principales */
         if (detailsContainer) {
             const price = place.price_by_night ?? place.price ?? 0;
+            
+            // CORRECTIF ICI : On teste plusieurs noms de clés possibles
+            const rooms = place.number_rooms ?? place.rooms ?? place.max_guests ?? '—';
+            const bathrooms = place.number_bathrooms ?? place.bathrooms ?? '—';
+
             detailsContainer.innerHTML = `
                 <div class="place-details">
                     <div class="place-details-header">
@@ -183,13 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="info-label">
                                 <img src="images/icon_bed.png" alt="" class="amenity-icon"> Bedrooms
                             </span>
-                            <span class="info-value">${escapeHtml(String(place.number_rooms ?? '—'))}</span>
+                            <span class="info-value">${escapeHtml(String(rooms))}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">
                                 <img src="images/icon_bath.png" alt="" class="amenity-icon"> Bathrooms
                             </span>
-                            <span class="info-value">${escapeHtml(String(place.number_bathrooms ?? '—'))}</span>
+                            <span class="info-value">${escapeHtml(String(bathrooms))}</span>
                         </div>
                     </div>
                     <p class="place-description-text">${escapeHtml(place.description)}</p>
@@ -213,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        /* Injection de la liste des avis */
+        /* Injection de la liste des avis (Le reste du code est correct) */
         if (reviewsContainer) {
             reviewsContainer.innerHTML = `<h2>Reviews</h2>`;
             if (place.reviews?.length > 0) {
@@ -234,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
     /*  FONCTIONS POUR ADD REVIEW */
 
     /**

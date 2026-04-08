@@ -89,6 +89,20 @@ class HBnBFacade:
         if place:
             place.update(place_data)
         return place
+    
+    def add_amenity_to_place(self, place_id, amenity_id):
+        """ Relie un équipement existant à un lieu. """
+        place = self.get_place(place_id)
+        amenity = self.get_amenity(amenity_id)
+        
+        if not place:
+            raise ValueError("Lieu non trouvé")
+        if not amenity:
+            raise ValueError("Équipement non trouvé")
+            
+        place.add_amenity(amenity)
+        
+        return place
 
     def create_review(self, review_data):
         user = self.get_user(review_data['user_id'])

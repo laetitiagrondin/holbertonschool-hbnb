@@ -8,9 +8,7 @@ Un lieu :
     - Appartient à exactement un User (propriétaire).
     - Peut recevoir plusieurs Review (avis, relation one-to-many).
     - Peut proposer plusieurs Amenity (équipements, relation many-to-many).
-Dépendances :
-    - base_model : classe parente fournissant id, created_at, updated_at.
-    - user       : référence au propriétaire du lieu.
+
 """
 
 from app.extensions import db
@@ -38,6 +36,8 @@ class Place(BaseModel):
     price       = db.Column(db.Float, nullable=False)
     latitude    = db.Column(db.Float, nullable=False)
     longitude   = db.Column(db.Float, nullable=False)
+    number_rooms = db.Column(db.Integer, nullable=False, default=1)
+    number_bathrooms = db.Column(db.Integer, nullable=False, default=1)
     owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     # Relation one-to-many : User -> Places
     owner = db.relationship('User', backref=db.backref('places', lazy=True))
@@ -45,10 +45,11 @@ class Place(BaseModel):
     reviews = db.relationship('Review', backref='place', lazy=True, cascade='all, delete-orphan')
     # Relation many-to-many : Place <-> Amenity
     amenities = db.relationship('Amenity', secondary=place_amenity,
-                                lazy='subquery',
+                                lazy='joined',
                                 backref=db.backref('places', lazy=True))
     
     def __init__(self, title, price, latitude, longitude,
+                 number_rooms=1, number_bathrooms=1,
                  owner=None, owner_id=None, description="", **kwargs):
         """
         Initialise un nouveau lieu et valide immédiatement ses attributs.
@@ -61,6 +62,8 @@ class Place(BaseModel):
         self.price     = float(price)
         self.latitude  = float(latitude)
         self.longitude = float(longitude)
+        self.number_rooms = int(number_rooms)
+        self.number_bathrooms = int(number_bathrooms)
         # Référence vers l'instance User propriétaire du lieu
         if owner:
             self.owner    = owner
@@ -208,10 +211,13 @@ class Place(BaseModel):
         # Ajoute les attributs spécifiques au lieu
         base.update({
             "title":       self.title,
+            "name":        self.title,
             "description": self.description,
             "price":       self.price,
             "latitude":    self.latitude,
             "longitude":   self.longitude,
+            "number_rooms": self.number_rooms,
+            "number_bathrooms": self.number_bathrooms,
 
             # Sérialisation étendue du propriétaire
             "owner": {
