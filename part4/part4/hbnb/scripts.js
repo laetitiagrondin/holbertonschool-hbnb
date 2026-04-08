@@ -4,11 +4,10 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* --- 1. FONCTIONS OUTILS (HELPERS) --- */
+    /*  FONCTIONS OUTILS (HELPERS)  */
 
     /**
      * Récupère la valeur d'un cookie par son nom.
-     * Utile pour extraire le jeton JWT stocké lors du login.
      */
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -19,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Sécurise les chaînes de caractères pour éviter les failles XSS.
-     * Remplace les caractères spéciaux par leurs entités HTML.
      */
     function escapeHtml(str) {
         if (!str) return "";
@@ -36,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return params.get('id');
     }
 
-    /* --- 2. LOGIQUE POUR LE FILTRAGE --- */
+    /* LOGIQUE POUR LE FILTRAGE */
 
     /**
      * Remplit dynamiquement le menu déroulant du filtre de prix sur l'index.
@@ -47,12 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const options = [
             { value: 'all', text: 'All' },
-            { value: '10', text: '$10' },
-            { value: '50', text: '$50' },
+            { value: '10',  text: '$10' },
+            { value: '50',  text: '$50' },
             { value: '100', text: '$100' }
         ];
 
-        filter.innerHTML = options.map(opt => 
+        filter.innerHTML = options.map(opt =>
             `<option value="${opt.value}">${opt.text}</option>`
         ).join('');
     }
@@ -74,14 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.style.display = 'block';
                 } else {
                     const maxPrice = parseFloat(selectedValue);
-                    // Logique : afficher si le prix de la carte <= prix maximum choisi
                     card.style.display = cardPrice <= maxPrice ? 'block' : 'none';
                 }
             });
         });
     }
 
-    /* --- 3. LOGIQUE API (FETCH & DISPLAY) --- */
+    /* LOGIQUE API (FETCH & DISPLAY) */
 
     /**
      * Récupère la liste de tous les lieux via l'API.
@@ -112,14 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayPlaces(places) {
         const container = document.getElementById('places-list');
         if (!container) return;
-        container.innerHTML = ''; 
-        
+        container.innerHTML = '';
+
         places.forEach(place => {
-            const title = place.title || place.name || "Untitled Place";
+            /* L'API  utilise "name", pas "title" */
+            const title = place.name || place.title || "Untitled Place";
             const price = place.price_by_night ?? place.price ?? 0;
+
             const article = document.createElement('article');
             article.className = 'place-card';
-            // On stocke le prix en attribut de données pour le filtrage JS
             article.setAttribute('data-price', price);
             article.innerHTML = `
                 <div class="place-info">
@@ -138,13 +136,15 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function fetchPlaceDetails(token, placeId) {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/v1/places/${placeId}`, {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const response = await fetch(
+                `http://127.0.0.1:5000/api/v1/places/${placeId}`, {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                headers: headers
             });
+
             if (response.ok) {
                 const place = await response.json();
                 displayPlaceDetails(place);
@@ -160,59 +160,139 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayPlaceDetails(place) {
         const detailsContainer = document.getElementById('place-details');
         const reviewsContainer = document.getElementById('reviews');
-        const breadcrumbName = document.getElementById('breadcrumb-name');
+        const breadcrumbName   = document.getElementById('breadcrumb-name');
 
-        // Mise à jour du fil d'Ariane
-        if (breadcrumbName) breadcrumbName.textContent = place.title || place.name;
+        /* Mise à jour du fil d'Ariane */
+        if (breadcrumbName) breadcrumbName.textContent = place.name || place.title;
 
-        // Injection des informations principales
+        /* Injection des informations principales */
         if (detailsContainer) {
             const price = place.price_by_night ?? place.price ?? 0;
             detailsContainer.innerHTML = `
-                <div class="place-header">
-                    <h1>${escapeHtml(place.title || place.name)}</h1>
-                    <p class="price-tag"><strong>$${price}</strong> per night</p>
-                </div>
-                <div class="place-content">
-                    <p class="description">${escapeHtml(place.description)}</p>
-                    <h3>Amenities</h3>
-                    <ul class="amenities-list">
-                        ${place.amenities?.map(a => `<li>${escapeHtml(a.name)}</li>`).join('') || '<li>None</li>'}
-                    </ul>
+                <div class="place-details">
+                    <div class="place-details-header">
+                        <h1>${escapeHtml(place.name || place.title)}</h1>
+                        <span class="price-badge">$${price} <small>/ night</small></span>
+                    </div>
+                    <div class="place-info">
+                        <div class="info-item">
+                            <span class="info-label">Host</span>
+                            <span class="info-value">${escapeHtml(place.owner?.first_name || '—')}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <img src="images/icon_bed.png" alt="" class="amenity-icon"> Bedrooms
+                            </span>
+                            <span class="info-value">${escapeHtml(String(place.number_rooms ?? '—'))}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <img src="images/icon_bath.png" alt="" class="amenity-icon"> Bathrooms
+                            </span>
+                            <span class="info-value">${escapeHtml(String(place.number_bathrooms ?? '—'))}</span>
+                        </div>
+                    </div>
+                    <p class="place-description-text">${escapeHtml(place.description)}</p>
+                    <div>
+                        <p class="amenities-title">Amenities</p>
+                        <div class="amenities-list">
+                            ${place.amenities?.length > 0
+                                ? place.amenities.map(a => {
+                                    const isWifi = a.name?.toLowerCase().includes('wifi') ||
+                                                   a.name?.toLowerCase().includes('wi-fi');
+                                    const icon = isWifi
+                                        ? `<img src="images/icon_wifi.png" alt="" class="amenity-icon"> `
+                                        : '';
+                                    return `<span class="amenity-tag">${icon}${escapeHtml(a.name)}</span>`;
+                                }).join('')
+                                : '<span class="amenity-tag">None listed</span>'
+                            }
+                        </div>
+                    </div>
                 </div>
             `;
         }
 
-        // Injection de la liste des avis
+        /* Injection de la liste des avis */
         if (reviewsContainer) {
-            reviewsContainer.innerHTML = `<h2>Reviews</h2>` + 
-                (place.reviews?.length > 0 
-                ? place.reviews.map(r => `
-                    <div class="review-card">
-                        <p>"${escapeHtml(r.text)}"</p>
-                        <p><strong>— ${escapeHtml(r.user_name || "Guest")}</strong></p>
-                    </div>`).join('')
-                : '<p>No reviews yet.</p>');
+            reviewsContainer.innerHTML = `<h2>Reviews</h2>`;
+            if (place.reviews?.length > 0) {
+                place.reviews.forEach(r => {
+                    const card = document.createElement('article');
+                    card.className = 'review-card';
+                    card.innerHTML = `
+                        <div class="review-card-header">
+                            <span class="review-author">${escapeHtml(r.user_name || 'Guest')}</span>
+                            <span class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                        </div>
+                        <p class="review-text">${escapeHtml(r.text)}</p>
+                    `;
+                    reviewsContainer.appendChild(card);
+                });
+            } else {
+                reviewsContainer.innerHTML += '<p>No reviews yet.</p>';
+            }
         }
     }
 
-    /* --- 4. INITIALISATION ET ROUTAGE --- */
+    /*  FONCTIONS POUR ADD REVIEW */
 
     /**
-     * Fonction principale qui orchestre le comportement du site selon la page chargée.
+     * Vérifie l'authentification. Redirige vers index.html si non connecté.
+     */
+    function checkAuthentication() {
+        const token = getCookie('token');
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+        return token;
+    }
+
+    /**
+     * Envoie l'avis à l'API.
+     */
+    async function submitReview(token, placeId, reviewText, rating) {
+        const response = await fetch(
+            `http://127.0.0.1:5000/api/v1/places/${placeId}/reviews`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ text: reviewText, rating: parseInt(rating) })
+        });
+        return response;
+    }
+
+    /**
+     * Gère la réponse de l'API après soumission d'un avis.
+     */
+    function handleResponse(response, form, placeId) {
+        if (response.ok || response.status === 201) {
+            alert('Review submitted successfully!');
+            form.reset();
+            if (placeId) window.location.href = `place.html?id=${placeId}`;
+        } else {
+            alert('Failed to submit review');
+        }
+    }
+
+    /* INITIALISATION ET ROUTAGE*/
+
+    /**
+     * Fonction principale qui orchestre le comportement selon la page chargée.
      */
     function initialize() {
-        const token = getCookie('token');
-        const placeId = getPlaceIdFromURL();
+        const token    = getCookie('token');
+        const placeId  = getPlaceIdFromURL();
         const authLink = document.getElementById('login-link');
 
-        // A. Gestion dynamique du Header (Bouton Login/Logout)
+        /* Gestion dynamique du Header (Login / Logout) */
         if (authLink) {
             if (token) {
                 authLink.textContent = "Logout";
                 authLink.onclick = (e) => {
                     e.preventDefault();
-                    // Suppression du cookie en le faisant expirer immédiatement
                     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
                     window.location.href = "index.html";
                 };
@@ -222,8 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // B. Configuration de la page d'accueil (index.html)
-                if (document.getElementById('places-list')) {
+        /* Page d'accueil (index.html) */
+        if (document.getElementById('places-list')) {
             /* Redirection si non connecté */
             if (!token) {
                 window.location.href = 'login.html';
@@ -234,14 +314,20 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchPlaces(token);
         }
 
-        // C. Gestion du formulaire de connexion (login.html)
+        /* Formulaire de connexion (login.html) */
         const loginForm = document.getElementById('login-form');
         if (loginForm) {
+            /* Déjà connecté aller directement à l'index */
+            if (token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = document.getElementById('email').value;
+                const email    = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                
+
                 const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -250,9 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    // Stockage du token dans un cookie sécurisé pour 24h
                     document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Strict`;
-                    document.cookie = `user_id=${data.user_id}; path=/; max-age=86400; SameSite=Strict`;
                     window.location.href = 'index.html';
                 } else {
                     alert("Invalid credentials");
@@ -260,63 +344,64 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // D. Configuration de la page de détails (place.html)
+        /* Page de détails (place.html) */
         if (placeId && document.getElementById('place-details')) {
             fetchPlaceDetails(token, placeId);
+
             const addReviewSection = document.getElementById('add-review');
             if (addReviewSection) {
-                // N'affiche le bouton "Add Review" que si l'utilisateur est connecté
-                addReviewSection.innerHTML = token 
-                    ? `<a href="add_review.html?id=${placeId}" class="add-review-button">Add a Review</a>`
+                addReviewSection.innerHTML = token
+                    ? `<a href="add_review.html?id=${placeId}" class="add-review-btn">
+                           ✍️ Add a Review
+                       </a>`
                     : `<p><a href="login.html">Login</a> to add a review.</p>`;
             }
         }
 
-        // E. Gestion de la page de création d'avis (add_review.html)
+        /*  Page de création d'avis (add_review.html) */
         const reviewForm = document.getElementById('review-form');
         if (reviewForm) {
-            // Sécurité : redirection si accès direct sans être connecté
-            if (!token) {
-                window.location.href = 'index.html';
-                return;
-            }
+            /* Vérification auth avec la fonction dédiée */
+            const reviewToken = checkAuthentication();
 
-            // Lien de retour dynamique vers le lieu consulté
+            /* Lien de retour vers le lieu */
             const backLink = document.getElementById('back-to-place');
-            if (backLink) backLink.href = `place.html?id=${placeId}`;
+            if (backLink && placeId) backLink.href = `place.html?id=${placeId}`;
+
+            /* Afficher le nom du lieu dans le sous-titre du formulaire */
+            if (reviewToken && placeId) {
+                fetch(`http://127.0.0.1:5000/api/v1/places/${placeId}`, {
+                    headers: { 'Authorization': `Bearer ${reviewToken}` }
+                })
+                .then(r => r.ok ? r.json() : null)
+                .then(place => {
+                    if (!place) return;
+                    const info = document.getElementById('review-place-info');
+                    if (info) info.textContent = `Reviewing: ${place.name || place.title}`;
+                })
+                .catch(() => {});
+            }
 
             reviewForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
-                
-                // --- ON RÉCUPÈRE LES DONNÉES ICI ---
-                const text = document.getElementById('review').value;
+
+                const text   = document.getElementById('review').value.trim();
                 const rating = document.getElementById('rating').value;
-                const userId = getCookie('user_id'); // On récupère l'ID depuis le cookie ici !
 
-                const response = await fetch('http://127.0.0.1:5000/api/v1/places/${placeId}/reviews`', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        text: text,
-                        rating: parseInt(rating)
-                    })
-                });
-
-                if (response.ok) {
-                    alert('Review submitted!');
-                    window.location.href = `place.html?id=${placeId}`;
-                } else {
-                    const errorData = await response.json();
-                    alert('Erreur ' + response.status + ' : ' + (errorData.message || 'Action interdite'));
-                    console.error('Détails du refus serveur:', errorData);
+                if (!text || !rating) {
+                    alert('Please fill in all fields.');
+                    return;
                 }
-            }); // Fermeture correcte de l'EventListener
+
+                /* Envoi de l'avis via submitReview() */
+                const response = await submitReview(reviewToken, placeId, text, rating);
+
+                /* Gestion de la réponse via handleResponse() */
+                handleResponse(response, reviewForm, placeId);
+            });
         }
     }
 
-    // Lancement de la logique applicative
+    /* Lancement de la logique applicative */
     initialize();
 });
