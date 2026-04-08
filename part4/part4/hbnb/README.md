@@ -1,84 +1,50 @@
-Introduction à la partie 2: Mise en œuvre de la logique d'entreprise et des points de terminaison API
+---
 
-Dans cette phase du projet HBnB, vous allez mettre en œuvre la fonctionnalité de base de l'application en utilisant Python et Flask. Cela impliquera de construire les couches logiques de présentation et d'affaires, et de définir les classes, les méthodes et les points de terminaison d'API essentiels, en fonction de la conception développée dans la partie précédente.
+## 🏗️ Architecture et Design Patterns
 
-L'objectif est de donner vie à l'architecture documentée en créant la structure du projet, en développant la logique commerciale et en mettant en œuvre des fonctionnalités clés telles que la gestion des utilisateurs, des lieux, des critiques et des commodités.
-Vision et portée du projet
+### Le Pattern Facade
+Pour respecter les consignes du projet, une **Facade** a été implémentée dans `app/services/facade.py`. Elle sert de point d'entrée unique pour la logique métier, permettant :
+* De découpler les contrôleurs API (Flask-RESTX) des modèles de données (SQLAlchemy).
+* De centraliser la gestion des erreurs et la validation des données.
+* De faciliter la maintenance et l'évolution du code.
 
-Cette partie est axée sur la création d'une base fonctionnelle et évolutive pour l'application. Vous travaillerez sur:
+### Modèle de Données (ERD)
+L'application repose sur quatre entités principales liées entre elles :
+* **User** : Gère les comptes et l'authentification (Bcrypt pour le hachage).
+* **Place** : Représente les hébergements avec leurs coordonnées (latitude/longitude).
+* **Amenity** : Liste les équipements disponibles (WiFi, Piscine, etc.).
+* **Review** : Fait le lien entre un utilisateur et un lieu pour les évaluations.
 
-    Business Logic Layer: Construire les modèles de base et la logique qui génèrent les fonctionnalités de l'application. Cela inclut la définition des relations, la gestion de la validation des données et la gestion des interactions entre les différents composants.
+## 🔒 Sécurité et Validation
 
-    Couche de présentation: Définition des services et des points de terminaison API à l'aide de Flask et flask-restx. Vous structurerez les points de terminaison logiquement, en assurant des chemins et des paramètres clairs pour chaque opération.
+### Gestion des Identités (JWT)
+L'authentification est gérée par des jetons **JWT**. Contrairement à une session classique, le JWT est sans état (stateless), ce qui rend l'API plus performante. 
+* Le jeton contient des informations sur l'utilisateur (ID, rôle admin).
+* Il est vérifié à chaque requête sensible (`POST`, `PUT`, `DELETE`).
 
-Objectifs d'apprentissage
+### Protection contre les attaques communes
+* **SQL Injection** : Prévenue par l'utilisation de l'ORM SQLAlchemy qui paramètre automatiquement les requêtes.
+* **XSS (Cross-Site Scripting)** : Prévenue côté Frontend par l'échappement systématique des données dynamiques.
+* **CORS (Cross-Origin Resource Sharing)** : Configuré pour n'autoriser que les origines de confiance (localhost), empêchant les sites tiers de faire des requêtes malveillantes.
 
-Cette partie du projet est conçue pour vous aider à atteindre les résultats d'apprentissage suivants:
+## 🛠️ Développement et Tests
 
-    Mettre en place la structure du projet:
-        Organisez le projet en une architecture modulaire, en suivant les meilleures pratiques pour les applications Python et Flask.
-        Créez les paquets nécessaires pour les couches Présentation et Logique d'entreprise.
+### Seeding de la Base de Données
+Le projet inclut un script de **seeding** automatique au démarrage de l'application (dans `app/__init__.py`). Cela permet d'avoir un environnement de test prêt à l'emploi avec :
+* Un utilisateur administrateur (`admin@hbnb.com`).
+* Un utilisateur de test (`test@hbnb.com`).
+* Des équipements et des lieux pré-remplis.
 
-    Mettre en œuvre la couche logique d'entreprise:
+### Endpoints Principaux
+| Méthode | Endpoint | Description | Auth Requise |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/login` | Connexion et récupération du JWT | Non |
+| `GET` | `/api/v1/places/` | Liste tous les lieux | Non |
+| `POST` | `/api/v1/reviews/` | Ajouter un avis sur un lieu | Oui (JWT) |
+| `PUT` | `/api/v1/users/me` | Modifier son profil | Oui (JWT) |
 
-    Comprendre comment traduire des conceptions documentées en code de travail par:
-        Développer les classes de base pour la logique d'entreprise, y compris les entités d'utilisateur, de lieu, de révision et d'équipement.
-        Mettre en œuvre des relations entre les entités et définir la façon dont elles interagissent au sein de l’application.
-        Mettre en œuvre le motif de façade pour simplifier la communication entre les couches Présentation et Business Logic.
+## 👥 Auteur
+* **Luidgi** - *Développement Backend & Intégration Frontend* -
 
-    Créez des terminaux d'API RESTful:
-        Mettre en œuvre les points de terminaison API nécessaires pour gérer les opérations CRUD pour les utilisateurs, les lieux, les avis et les équipements.
-        Utilisation flask-restxpour définir et documenter l'API, en assurant une structure claire et cohérente.
-        Implémentez la sérialisation de données pour renvoyer des attributs étendus pour les objets associés. Par exemple, lors de la récupération d'un lieu, l'API doit inclure des détails tels que celui du propriétaire first_name, last_name, et commodités pertinentes.
-
-    Tester et valider l'API:
-        Rédigez des tests pour valider le comportement des classes de logique d'entreprise.
-        Assurez-vous que les réponses de l'API sont cohérentes avec le comportement attendu.
-        Assurez-vous que chaque point de terminaison fonctionne correctement et gère les cas de bord de manière appropriée.
-
-
-
-Créer la structure du répertoire de projet :
-
-Votre projet doit être organisé dans la structure suivante:
-
-hbnb/
-├── app/
-│   ├── __init__.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── v1/
-│   │       ├── __init__.py
-│   │       ├── users.py
-│   │       ├── places.py
-│   │       ├── reviews.py
-│   │       ├── amenities.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── user.py
-│   │   ├── place.py
-│   │   ├── review.py
-│   │   ├── amenity.py
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── facade.py
-│   ├── persistence/
-│       ├── __init__.py
-│       ├── repository.py
-├── run.py
-├── config.py
-├── requirements.txt
-├── README.md
-
-Explication:
-
-    Le app/répertoire contient le code d'application de base.
-    Le api/sous-répertoire abrite les terminaux API, organisés par version (v1/).
-    Le models/sous-répertoire contient les classes logiques d'entreprise (p. ex., user.py, place.py).
-    Le services/Le sous-répertoire est l'endroit où le motif Facade est implémenté, en gérant l'interaction entre les couches.
-    Le persistence/Le sous-répertoire est l'endroit où le dépôt en mémoire est implémenté. Cela sera ensuite remplacé par une solution de base de données utilisant SQL Alchemy.
-    run.pyest le point d'entrée pour l'exécution de l'application Flask.
-    config.pysera utilisé pour configurer les variables d'environnement et les paramètres d'application.
-    requirements.txtIl listera tous les paquets Python nécessaires au projet.
-    README.mdContiendra un bref aperçu du projet.
-
+---
+*Projet réalisé dans le cadre du cursus Holberton School.*
