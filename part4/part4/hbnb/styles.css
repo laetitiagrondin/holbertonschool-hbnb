@@ -816,3 +816,22 @@ form button[type="submit"]:hover,
     margin-right: 4px;
     vertical-align: middle;
 }
+
+/* Style du bouton d'ajout d'avis */
+.add-review-button {
+    display: inline-block;      /* Permet de donner une taille au bouton */
+    background-color: #E8603C;  /* La couleur rouge HBnB */
+    color: white !important;    /* Texte en blanc */
+    padding: 10px 20px;         /* Espacement intérieur (taille du bouton) */
+    border-radius: 4px;         /* Coins légèrement arrondis */
+    text-decoration: none;      /* Enlève le souligné du lien */
+    font-weight: bold;          /* Texte en gras */
+    margin-top: 20px;           /* Espace avec le texte au-dessus */
+    transition: 0.3s;           /* Animation fluide au survol */
+}
+
+/* Changement de couleur quand on passe la souris dessus */
+.add-review-button:hover {
+    background-color: #E8603C;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

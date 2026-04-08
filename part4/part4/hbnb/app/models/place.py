@@ -201,15 +201,6 @@ class Place(BaseModel):
     def to_dict(self) -> dict:
         """
         Sérialise le lieu sous forme de dictionnaire JSON-compatible.
-
-        Retourne une représentation **étendue** : au lieu d'un simple UUID
-        pour le propriétaire et les équipements, le dictionnaire inclut
-        les informations détaillées de chaque entité liée (first_name,
-        last_name, email pour l'owner ; id et name pour chaque amenity).
-
-        Retour
-        dict
-            Dictionnaire complet du lieu avec owner et amenities développés.
         """
         # Récupère le dictionnaire de base (id, created_at, updated_at)
         base = super().to_dict()
@@ -222,8 +213,7 @@ class Place(BaseModel):
             "latitude":    self.latitude,
             "longitude":   self.longitude,
 
-            # Sérialisation étendue du propriétaire :
-            # inclut les informations de contact plutôt que le simple UUID
+            # Sérialisation étendue du propriétaire
             "owner": {
                 "id":         self.owner.id,
                 "first_name": self.owner.first_name,
@@ -235,6 +225,15 @@ class Place(BaseModel):
             "amenities": [
                 {"id": a.id, "name": a.name} for a in self.amenities
             ],
+
+            "reviews": [
+                {
+                    "id": r.id,
+                    "text": r.text,
+                    "rating": r.rating,
+                    "user_name": f"{r.user.first_name} {r.user.last_name}" if r.user else "Anonymous"
+                } for r in self.reviews
+            ]
         })
         return base
 

@@ -223,7 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // B. Configuration de la page d'accueil (index.html)
-        if (document.getElementById('places-list')) {
+                if (document.getElementById('places-list')) {
+            /* Redirection si non connecté */
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
             populatePriceFilter();
             setupPriceFilter();
             fetchPlaces(token);
@@ -247,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json();
                     // Stockage du token dans un cookie sécurisé pour 24h
                     document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Strict`;
+                    document.cookie = `user_id=${data.user_id}; path=/; max-age=86400; SameSite=Strict`;
                     window.location.href = 'index.html';
                 } else {
                     alert("Invalid credentials");
@@ -281,17 +287,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             reviewForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
+                
+                // --- ON RÉCUPÈRE LES DONNÉES ICI ---
                 const text = document.getElementById('review').value;
                 const rating = document.getElementById('rating').value;
+                const userId = getCookie('user_id'); // On récupère l'ID depuis le cookie ici !
 
-                const response = await fetch('http://127.0.0.1:5000/api/v1/reviews/', {
+                const response = await fetch('http://127.0.0.1:5000/api/v1/places/${placeId}/reviews`', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`, // Envoi obligatoire du JWT
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        place_id: placeId,
                         text: text,
                         rating: parseInt(rating)
                     })
@@ -301,9 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Review submitted!');
                     window.location.href = `place.html?id=${placeId}`;
                 } else {
-                    alert('Failed to submit review.');
+                    const errorData = await response.json();
+                    alert('Erreur ' + response.status + ' : ' + (errorData.message || 'Action interdite'));
+                    console.error('Détails du refus serveur:', errorData);
                 }
-            });
+            }); // Fermeture correcte de l'EventListener
         }
     }
 
