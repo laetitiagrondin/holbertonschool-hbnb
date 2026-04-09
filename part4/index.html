@@ -11,23 +11,27 @@
     <header>
         <img src="images/logo.png" class="logo" alt="logo">
         <nav>
-            <a href="index.html">Home</a>
-            <a href="login.html" class="login-button" id="login-link">Login</a>
+            <a href="./index">Home</a>
+            <a href="./login.html" class="login-button" id="login-link">Login</a>
         </nav>
     </header>
     <main>
         <section id="filter">
             <label for="price-filter">Max Price:</label>
             <select id="price-filter">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">all</option>
             </select>
         </section>
         <section id="places-list">
-            <div class="place-card">
+            <div class="place-card" data-price="100">
                 <h3>Nice Apartment</h3>
                 <p>100€/night</p>
                 <button class="details-button">View Details</button>
             </div>
-            <div class="place-card">
+            <div class="place-card" data-price="80">
                 <h3>Cozy House</h3>
                 <p>80€/night</p>
                 <button class="details-button">View Details</button>
