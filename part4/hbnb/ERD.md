@@ -1,3 +1,5 @@
+# HBnB - Entity Relationship Diagram
+```mermaid
 erDiagram
     USER {
         string id PK
@@ -41,3 +43,4 @@ erDiagram
     PLACE ||--o{ REVIEW : recoit
     PLACE ||--o{ PLACE_AMENITY : contient
     AMENITY ||--o{ PLACE_AMENITY : associe
+```
