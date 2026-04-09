@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    function getPlaceIdFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
+    }
+
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async (event) => {
@@ -13,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     const reviewForm = document.getElementById('review-form');
-    const token = checkAuthentication();
+    const token = checkAuthenticationIndex();
     const placeId = getPlaceIdFromURL();
     if (reviewForm) {
         reviewForm.addEventListener('submit', async (event) => {
@@ -27,17 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    checkAuthentication();
+    checkAuthenticationPlaceDetails();
     const priceFilter = document.getElementById('price-filter');
     priceFilter.addEventListener('change', (event) => {
         const selectedPrice = event.target.value;
         filterPlacesByPrice(selectedPrice);
     });
-
-    function getPlaceIdFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('id');
-    }
 
     function checkAuthenticationIndex() {
         const token = getCookie('token');
@@ -53,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAuthenticationPlaceDetails(placeId) {
         const token = getCookie('token');
         const addReviewSection = document.getElementById('add-review');
+        if (!addReviewSection) return;
         if (!token) {
             addReviewSection.style.display = 'none';
         } else {
@@ -61,19 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function checkAuthenticationIndexReview() {
+    function checkAuthenticationReview() {
         const token = getCookie('token');
         if (!token) {
             window.location.href = 'index.html';
         }
         return token;
-    }
-
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
     }
 
     function getPlaceIdFromURL() {
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchPlaces(token) {
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/v1/places', {
+            const response = await fetch(`http://127.0.0.1:5000/api/v1/places`, {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json',
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchPlaceDetails(token, placeId) {
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/v1/places/${placeId}', {
+            const response = await fetch(`http://127.0.0.1:5000/api/v1/places/${placeId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -173,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function submitReview(token, placeId, reviewText, form) {
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/v1/places/${placeId}/reviews', {
+            const response = await fetch(`http://127.0.0.1:5000/api/v1/places/${placeId}/reviews`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application-json',
@@ -188,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loginUser(email, password) {
-        const response = await fetch('http://127.0.0.1/5000/api/v1/auth/login', {
+        const response = await fetch(`http://127.0.0.1:5000/api/v1/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
