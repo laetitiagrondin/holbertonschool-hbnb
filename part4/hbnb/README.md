@@ -58,7 +58,7 @@ Ce projet implémente un **front-end en Javascript pur (Vanilla JS)** qui commun
 
 ---
 
-Ajout d'un avis (add_review.html)
+### Ajout d'un avis (add_review.html)
 
 * Vérification de l'authentification
 * Redirection si non connecté
