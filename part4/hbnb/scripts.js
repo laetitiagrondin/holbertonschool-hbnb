@@ -14,6 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
       });
     }
+    const reviewForm = document.getElementById('review-form');
+    const token = checkAuthentication();
+    const placeId = getPlaceIdFromURL();
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const reviewText = document.getElementById('review-text').value.trim();
+            if (!reviewText) {
+                alert('Please ! Enter a review.');
+                return;
+            }
+            await submitReview(token, placeId, reviewText, reviewForm);
+        });
+    }
+
     checkAuthentication();
     const priceFilter = document.getElementById('price-filter');
     priceFilter.addEventListener('change', (event) => {
@@ -51,6 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function checkAuthentication() {
+        const token = getCookie('token');
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+        return token;
+    }
+
     /**
      * Récupérer la valeur d'un cookie
      */
@@ -59,6 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
+    }
+
+    function getPlaceIdFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
     }
 
     /**
@@ -161,6 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    async function submitReview(token, placeId, reviewText, form) {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/v1/places/${placeId}/reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application-json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ review: reviewText, place_id: placeId })
+            });
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('An error occured while submitting your review.');
+        }
+    }
+
     async function loginUser(email, password) {
         const response = await fetch('http://127.0.0.1/5000/api/v1/auth/login', {
             method: 'POST',
@@ -175,6 +219,15 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.html';
         } else {
             alert('Login failed: ' + response.statusText);
+        }
+    }
+
+    function handleResponse(response, form) {
+        if (response.ok) {
+            alert('Review submitted successfully!');
+            form.reset();
+        } else {
+            alert ('Failed to submit review.');
         }
     }
 });
