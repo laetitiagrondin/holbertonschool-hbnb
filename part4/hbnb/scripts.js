@@ -41,18 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return params.get('id');
     }
 
-    /**
-     * Vérifier l'authentification de l'utilisateur
-     */
-    function checkAuthentication() {
+    function checkAuthenticationIndex() {
         const token = getCookie('token');
         const loginLink = document.getElementById('login-link');
         if (!token) {
-            loginLink.style.display = 'block';
+            if (loginLink) loginLink.style.display = 'block';
         } else {
-            loginLink.style.display = 'none';
-            fetchPlaces(token);
+            if (loginLink) loginLink.style.display = 'none';
         }
+        fetchPlaces(token);
     }
 
     function checkAuthenticationPlaceDetails(placeId) {
@@ -66,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function checkAuthentication() {
+    function checkAuthenticationIndexReview() {
         const token = getCookie('token');
         if (!token) {
             window.location.href = 'index.html';
@@ -74,9 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return token;
     }
 
-    /**
-     * Récupérer la valeur d'un cookie
-     */
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -89,9 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return params.get('id');
     }
 
-    /**
-     * Récupérer les places depuis l'API
-     */
     async function fetchPlaces(token) {
         try {
             const response = await fetch('http://127.0.0.1:5000/api/v1/places', {
@@ -112,9 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Afficher les places dans #places-list
-     */
     function displayPlaces(places) {
         const container = document.getElementById('places-list');
         container.innerHTML = '';
@@ -170,10 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         container.innerHTML = detailsHTML;
     }
-
-    /**
-     * Filtrer les places affichées selon les prix
-     */
 
     function filterPlacesByPrice(selectedPrice) {
         const cards = document.querySelectorAll('.place-card');
